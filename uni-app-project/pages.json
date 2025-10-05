@@ -1,0 +1,104 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "每日打卡",
+				"navigationBarBackgroundColor": "#4A90E2",
+				"navigationBarTextStyle": "white",
+				"backgroundColor": "#f8f9fa"
+			}
+		},
+		{
+			"path": "pages/tasks/tasks",
+			"style": {
+				"navigationBarTitleText": "任务管理",
+				"navigationBarBackgroundColor": "#4A90E2",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/stats/stats",
+			"style": {
+				"navigationBarTitleText": "数据统计",
+				"navigationBarBackgroundColor": "#4A90E2",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/profile/profile",
+			"style": {
+				"navigationBarTitleText": "个人中心",
+				"navigationBarBackgroundColor": "#4A90E2",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/parent/parent",
+			"style": {
+				"navigationBarTitleText": "家长管理",
+				"navigationBarBackgroundColor": "#4A90E2",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/shop/shop",
+			"style": {
+				"navigationBarTitleText": "积分商城",
+				"navigationBarBackgroundColor": "#4A90E2",
+				"navigationBarTextStyle": "white"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "每日打卡",
+		"navigationBarBackgroundColor": "#4A90E2",
+		"backgroundColor": "#f8f9fa",
+		"app-plus": {
+			"background": "#efeff4"
+		}
+	},
+	"tabBar": {
+		"color": "#7A7E83",
+		"selectedColor": "#4A90E2",
+		"borderStyle": "black",
+		"backgroundColor": "#ffffff",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"iconPath": "static/tabbar/home.png",
+				"selectedIconPath": "static/tabbar/home-active.png",
+				"text": "首页"
+			},
+			{
+				"pagePath": "pages/tasks/tasks",
+				"iconPath": "static/tabbar/tasks.png",
+				"selectedIconPath": "static/tabbar/tasks-active.png",
+				"text": "任务"
+			},
+			{
+				"pagePath": "pages/stats/stats",
+				"iconPath": "static/tabbar/stats.png",
+				"selectedIconPath": "static/tabbar/stats-active.png",
+				"text": "统计"
+			},
+			{
+				"pagePath": "pages/profile/profile",
+				"iconPath": "static/tabbar/profile.png",
+				"selectedIconPath": "static/tabbar/profile-active.png",
+				"text": "我的"
+			}
+		]
+	},
+	"condition": {
+		"current": 0,
+		"list": [
+			{
+				"name": "",
+				"path": "",
+				"query": ""
+			}
+		]
+	}
+}

@@ -1,0 +1,2630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日打卡 - 中学生自律习惯培养应用</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif;
+            background: #F2F2F7;
+            min-height: 100vh;
+            color: #1C1C1E;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .app-container {
+            max-width: 390px;
+            margin: 0 auto;
+            background: #F2F2F7;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 顶部状态栏 */
+        .status-bar {
+            height: 47px;
+            background: rgba(242, 242, 247, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            font-weight: 600;
+            color: #1C1C1E;
+            border-bottom: 0.5px solid rgba(60, 60, 67, 0.12);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        /* 页面内容区域 */
+        .page {
+            display: none;
+            padding: 16px;
+            padding-bottom: 100px;
+            min-height: calc(100vh - 144px);
+        }
+
+        .page.active {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* 首页样式 */
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            color: white;
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #fff;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .edit-profile-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .edit-profile-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.1);
+        }
+
+        .edit-profile-btn:active {
+            transform: scale(0.95);
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .user-level {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .points-display {
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin-top: 15px;
+            display: inline-block;
+        }
+
+        /* 今日进度 */
+        .progress-section {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 0.5px solid rgba(60, 60, 67, 0.12);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .progress-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1C1C1E;
+            letter-spacing: -0.4px;
+        }
+
+        .progress-stats {
+            font-size: 15px;
+            color: #8E8E93;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #F2F2F7;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #34C759, #30D158);
+            border-radius: 3px;
+            transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* 任务列表 */
+        .task-section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            margin-left: 4px;
+            color: #1C1C1E;
+            letter-spacing: -0.4px;
+        }
+
+        .task-item {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 20px 16px;
+            margin-bottom: 8px;
+            border: 0.5px solid rgba(60, 60, 67, 0.12);
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
+            gap: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .task-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .task-item:active {
+            transform: scale(0.98);
+        }
+
+        /* 隐藏非当天任务的样式 */
+        .task-item.hidden-task {
+            display: none !important;
+        }
+
+        .task-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .task-icon.school { background: #E8F4FD; color: #007AFF; }
+        .task-icon.home { background: #F2E8FF; color: #AF52DE; }
+        .task-icon.temp { background: #FFF2E8; color: #FF9500; }
+
+        .task-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .task-name {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1C1C1E;
+            line-height: 1.3;
+            letter-spacing: -0.4px;
+        }
+
+        .task-meta {
+            font-size: 14px;
+            color: #8E8E93;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            line-height: 1.2;
+        }
+
+        .task-points {
+            background: #F2F2F7;
+            color: #007AFF;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+
+        .check-button {
+            width: 28px;
+            height: 28px;
+            border: 2px solid #C7C7CC;
+            border-radius: 50%;
+            background: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .check-button.completed {
+            background: #34C759;
+            border-color: #34C759;
+            color: white;
+        }
+
+        .check-button:hover {
+            transform: scale(1.05);
+            border-color: #007AFF;
+        }
+
+        .check-button:active {
+            transform: scale(0.95);
+        }
+
+        /* 任务操作按钮 */
+        .task-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .task-actions .action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .task-actions .edit-btn {
+            background: #F2F2F7;
+            color: #007AFF;
+        }
+
+        .task-actions .edit-btn:hover {
+            background: #E5E5EA;
+            transform: scale(1.05);
+        }
+
+        .task-actions .edit-btn:active {
+            transform: scale(0.95);
+            background: #D1D1D6;
+        }
+
+        .task-actions .delete-btn {
+            background: #F2F2F7;
+            color: #FF3B30;
+        }
+
+        .task-actions .delete-btn:hover {
+            background: #FFE5E5;
+            transform: scale(1.05);
+        }
+
+        .task-actions .delete-btn:active {
+            transform: scale(0.95);
+            background: #FFD1D1;
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 390px;
+            height: 83px;
+            background: rgba(242, 242, 247, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid rgba(60, 60, 67, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 8px 0 34px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            min-width: 60px;
+        }
+
+        .nav-item.active {
+            color: #007AFF;
+        }
+
+        .nav-item:active {
+            transform: scale(0.95);
+        }
+
+        .nav-icon {
+            font-size: 26px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: #8E8E93;
+            letter-spacing: -0.2px;
+        }
+
+        .nav-item.active .nav-label {
+            color: #007AFF;
+        }
+
+        /* 统计页面 */
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #007AFF;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* 添加任务页面 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #007AFF;
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+        }
+
+        .voice-btn {
+            width: 48px;
+            height: 48px;
+            border: 1px solid #007AFF;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .voice-btn:hover {
+            background: #f0f8ff;
+            transform: scale(1.05);
+        }
+
+        .voice-btn:active {
+            transform: scale(0.95);
+        }
+
+        .voice-btn.recording {
+            background: #ff3b30;
+            border-color: #ff3b30;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .category-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .category-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .category-btn.active {
+            background: #007AFF;
+            color: white;
+            border-color: #007AFF;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #007AFF, #0056CC);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* 家长管理样式 */
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        /* 权限控制样式 */
+        .parent-mode .delete-btn {
+            display: inline-block !important;
+        }
+
+        .parent-mode #taskPoints {
+            display: block !important;
+        }
+
+        .parent-mode #studentPointsInfo {
+            display: none !important;
+        }
+
+        .student-mode #taskPoints {
+            display: none !important;
+        }
+
+        .student-mode #studentPointsInfo {
+            display: block !important;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .reward-item {
+            position: relative;
+        }
+        
+        .reward-item[data-category="physical"] .task-icon {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+        }
+        
+        .reward-item[data-category="experience"] .task-icon {
+            background: linear-gradient(135deg, #4ECDC4, #6EDDD6);
+        }
+        
+        .reward-item[data-category="privilege"] .task-icon {
+            background: linear-gradient(135deg, #FFD93D, #FFE066);
+        }
+
+        /* 成就页面 */
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .achievement-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .achievement-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .achievement-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .achievement-desc {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .achievement-item.unlocked {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: white;
+        }
+
+        /* 动画效果 */
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            z-index: 1000;
+            animation: celebrate 1s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes celebrate {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+
+        /* 奖励操作按钮样式 */
+        .reward-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .edit-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        .delete-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+        }
+
+        /* 学生端隐藏删除按钮 */
+        .student-mode .delete-btn {
+            display: none;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 375px) {
+            .app-container {
+                max-width: 100%;
+            }
+            
+            .bottom-nav {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="student-mode">
+    <div class="app-container">
+        <!-- 状态栏 -->
+        <div class="status-bar">
+            每日打卡 - 培养自律好习惯
+        </div>
+
+        <!-- 首页/今日任务 -->
+        <div class="page active" id="home">
+            <!-- 欢迎区域 -->
+            <div class="welcome-section">
+                <div class="avatar">👦</div>
+                <div class="user-name">小明同学</div>
+                <div class="user-level">初中二年级 · 自律达人</div>
+                <div class="points-display">
+                    💎 今日积分: <span id="todayPoints">85</span> | 总积分: <span id="totalPoints">2,340</span>
+                </div>
+            </div>
+
+            <!-- 今日进度 -->
+            <div class="progress-section">
+                <div class="progress-header">
+                    <div class="progress-title">今日完成进度</div>
+                    <div class="progress-stats"><span id="completedTasks">6</span>/<span id="totalTasks">8</span> 已完成</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 75%"></div>
+                </div>
+                <div style="font-size: 12px; color: #666; text-align: center;">
+                    🎉 太棒了！再完成2个任务就能获得额外奖励积分！
+                </div>
+            </div>
+
+            <!-- 学校任务 -->
+            <div class="task-section">
+                <div class="section-title">📚 学校任务</div>
+                <div class="task-item">
+                    <div class="check-button completed" onclick="toggleTask(this)">✓</div>
+                    <div class="task-icon school">📖</div>
+                    <div class="task-content">
+                        <div class="task-name">完成数学作业</div>
+                        <div class="task-meta">
+                            <span>📅 每日任务</span>
+                            <span>⏰ 20:00前</span>
+                            <span class="task-points">+15积分</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" onclick="editTask(1, '完成数学作业', '📖', 'school', 15, 'daily', '20:00')">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteTask(1, '完成数学作业')">🗑️</button>
+                    </div>
+                </div>
+                
+                <div class="task-item">
+                    <div class="check-button" onclick="toggleTask(this)"></div>
+                    <div class="task-icon school">📝</div>
+                    <div class="task-content">
+                        <div class="task-name">预习明天英语课文</div>
+                        <div class="task-meta">
+                            <span>📅 每日任务</span>
+                            <span>⏰ 21:00前</span>
+                            <span class="task-points">+10积分</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" onclick="editTask(2, '预习明天英语课文', '📝', 'school', 10, 'daily', '21:00')">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteTask(2, '预习明天英语课文')">🗑️</button>
+                    </div>
+                </div>
+
+                <div class="task-item">
+                    <div class="check-button completed" onclick="toggleTask(this)">✓</div>
+                    <div class="task-icon school">🏃</div>
+                    <div class="task-content">
+                        <div class="task-name">体育锻炼30分钟</div>
+                        <div class="task-meta">
+                            <span>📆 周一三五</span>
+                            <span>⏰ 18:00前</span>
+                            <span class="task-points">+20积分</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" onclick="editTask(3, '体育锻炼30分钟', '🏃', 'school', 20, 'weekly', '18:00')">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteTask(3, '体育锻炼30分钟')">🗑️</button>
+                    </div>
+                </div>
+
+                <div class="task-item">
+                    <div class="check-button" onclick="toggleTask(this)"></div>
+                    <div class="task-icon school">📚</div>
+                    <div class="task-content">
+                        <div class="task-name">写周记总结</div>
+                        <div class="task-meta">
+                            <span>📆 每周日</span>
+                            <span>⏰ 19:00前</span>
+                            <span class="task-points">+25积分</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" onclick="editTask(4, '写周记总结', '📚', 'school', 25, 'weekly', '19:00')">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteTask(4, '写周记总结')">🗑️</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 家庭任务 -->
+            <div class="task-section">
+                <div class="section-title">🏠 家庭任务</div>
+                <div class="task-item">
+                    <div class="check-button completed" onclick="toggleTask(this)">✓</div>
+                    <div class="task-icon home">🧹</div>
+                    <div class="task-content">
+                        <div class="task-name">整理自己的房间</div>
+                        <div class="task-meta">
+                            <span>📆 周二四六</span>
+                            <span>⏰ 19:00前</span>
+                            <span class="task-points">+12积分</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" onclick="editTask(5, '整理自己的房间', '🧹', 'home', 12, 'weekly', '19:00')">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteTask(5, '整理自己的房间')">🗑️</button>
+                    </div>
+                </div>
+
+                <div class="task-item">
+                    <div class="check-button" onclick="toggleTask(this)"></div>
+                    <div class="task-icon home">🍽️</div>
+                    <div class="task-content">
+                        <div class="task-name">帮妈妈洗碗</div>
+                        <div class="task-meta">
+                            <span>📅 每日任务</span>
+                            <span>⏰ 20:30前</span>
+                            <span class="task-points">+8积分</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" onclick="editTask(6, '帮妈妈洗碗', '🍽️', 'home', 8, 'daily', '20:30')">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteTask(6, '帮妈妈洗碗')">🗑️</button>
+                    </div>
+                </div>
+
+                <div class="task-item">
+                    <div class="check-button" onclick="toggleTask(this)"></div>
+                    <div class="task-icon home">🛒</div>
+                    <div class="task-content">
+                        <div class="task-name">陪妈妈买菜</div>
+                        <div class="task-meta">
+                            <span>📆 每周六</span>
+                            <span>⏰ 10:00前</span>
+                            <span class="task-points">+15积分</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" onclick="editTask(7, '陪妈妈买菜', '🛒', 'home', 15, 'weekly', '10:00')">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteTask(7, '陪妈妈买菜')">🗑️</button>
+                    </div>
+                </div>
+
+                <div class="task-item">
+                    <div class="check-button" onclick="toggleTask(this)"></div>
+                    <div class="task-icon home">💰</div>
+                    <div class="task-content">
+                        <div class="task-name">整理零花钱账本</div>
+                        <div class="task-meta">
+                            <span>🗓️ 每月1号</span>
+                            <span>⏰ 21:00前</span>
+                            <span class="task-points">+30积分</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" onclick="editTask(8, '整理零花钱账本', '💰', 'home', 30, 'monthly', '21:00')">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteTask(8, '整理零花钱账本')">🗑️</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 临时任务 -->
+            <div class="task-section">
+                <div class="section-title">⚡ 临时任务</div>
+                <div class="task-item">
+                    <div class="check-button" onclick="toggleTask(this)"></div>
+                    <div class="task-icon temp">📚</div>
+                    <div class="task-content">
+                        <div class="task-name">准备明天的演讲稿</div>
+                        <div class="task-meta">
+                            <span>⏰ 明天 08:00前</span>
+                            <span class="task-points">+25积分</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" onclick="editTask(9, '准备明天的演讲稿', '📚', 'temp', 25, 'temp', '08:00')">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteTask(9, '准备明天的演讲稿')">🗑️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务管理页面 -->
+        <div class="page" id="tasks">
+            <div class="section-title">➕ 添加新任务</div>
+            
+            <div class="form-group">
+                <label class="form-label">任务名称</label>
+                <div style="position: relative; display: flex; align-items: center; gap: 10px;">
+                    <input type="text" class="form-input" placeholder="请输入任务名称或点击语音输入" id="taskName" style="flex: 1;">
+                    <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceInput()" title="语音输入">
+                        🎤
+                    </button>
+                </div>
+                <div id="voiceStatus" style="display: none; margin-top: 8px; padding: 8px; background: #f0f8ff; border-radius: 8px; font-size: 14px; color: #007AFF;">
+                    <span id="voiceStatusText">正在聆听...</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">任务分类</label>
+                <div class="category-buttons">
+                    <div class="category-btn active" onclick="selectCategory(this, 'school')">📚 学校</div>
+                    <div class="category-btn" onclick="selectCategory(this, 'home')">🏠 家庭</div>
+                    <div class="category-btn" onclick="selectCategory(this, 'temp')">⚡ 临时</div>
+                </div>
+            </div>
+
+            <div class="form-group" id="pointsGroup" style="display: none;">
+                <label class="form-label">积分奖励</label>
+                <input type="number" class="form-input" placeholder="完成任务可获得的积分" id="taskPoints" value="1">
+            </div>
+            
+            <!-- 学生端显示的积分信息 -->
+            <div class="form-group" id="studentPointsInfo">
+                <label class="form-label">积分奖励</label>
+                <div style="padding: 12px 15px; background: #f8f9fa; border-radius: 10px; color: #666; font-size: 16px;">
+                    🏆 完成任务可获得 1 积分
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">任务频率</label>
+                <div class="category-buttons">
+                    <div class="category-btn active" onclick="selectFrequency(this, 'daily')">📅 每日</div>
+                    <div class="category-btn" onclick="selectFrequency(this, 'weekly')">📆 每周</div>
+                    <div class="category-btn" onclick="selectFrequency(this, 'monthly')">🗓️ 每月</div>
+                </div>
+            </div>
+
+            <div class="form-group" id="weeklyOptions" style="display: none;">
+                <label class="form-label">选择星期几</label>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                    <div class="category-btn" onclick="toggleWeekday(this, 1)">周一</div>
+                    <div class="category-btn" onclick="toggleWeekday(this, 2)">周二</div>
+                    <div class="category-btn" onclick="toggleWeekday(this, 3)">周三</div>
+                    <div class="category-btn" onclick="toggleWeekday(this, 4)">周四</div>
+                    <div class="category-btn" onclick="toggleWeekday(this, 5)">周五</div>
+                    <div class="category-btn" onclick="toggleWeekday(this, 6)">周六</div>
+                    <div class="category-btn" onclick="toggleWeekday(this, 0)">周日</div>
+                    <div></div>
+                </div>
+            </div>
+
+            <div class="form-group" id="monthlyOptions" style="display: none;">
+                <label class="form-label">选择日期</label>
+                <input type="number" class="form-input" placeholder="每月几号执行 (1-31)" id="monthlyDate" min="1" max="31">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">完成时间</label>
+                <input type="time" class="form-input" id="taskTime" value="20:00">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">任务描述</label>
+                <textarea class="form-input" rows="3" placeholder="详细描述任务内容（可选）" id="taskDesc"></textarea>
+            </div>
+
+            <button class="submit-btn" onclick="addTask()">
+                ✨ 创建任务
+            </button>
+
+            <div style="margin-top: 30px;">
+                <div class="section-title">📋 我的任务模板</div>
+                <div class="task-item" onclick="useTemplate('完成数学作业', 'school', 15, 'daily')">
+                    <div class="task-icon school">📖</div>
+                    <div class="task-content">
+                        <div class="task-name">完成数学作业</div>
+                        <div class="task-meta">
+                            <span>📅 每日任务</span>
+                            <span class="task-points">+15积分</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="task-item" onclick="useTemplate('体育锻炼', 'school', 20, 'weekly')">
+                    <div class="task-icon school">🏃</div>
+                    <div class="task-content">
+                        <div class="task-name">体育锻炼</div>
+                        <div class="task-meta">
+                            <span>📆 每周任务</span>
+                            <span class="task-points">+20积分</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="task-item" onclick="useTemplate('整理房间', 'home', 12, 'weekly')">
+                    <div class="task-icon home">🧹</div>
+                    <div class="task-content">
+                        <div class="task-name">整理房间</div>
+                        <div class="task-meta">
+                            <span>📆 每周任务</span>
+                            <span class="task-points">+12积分</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-item" onclick="useTemplate('整理零花钱账本', 'home', 30, 'monthly')">
+                    <div class="task-icon home">💰</div>
+                    <div class="task-content">
+                        <div class="task-name">整理零花钱账本</div>
+                        <div class="task-meta">
+                            <span>🗓️ 每月任务</span>
+                            <span class="task-points">+30积分</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据统计页面 -->
+        <div class="page" id="stats">
+            <div class="section-title">📊 我的成长数据</div>
+            
+            <div class="stats-card">
+                <div class="progress-title" style="margin-bottom: 15px;">本周完成情况</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">42</div>
+                        <div class="stat-label">已完成任务</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">89%</div>
+                        <div class="stat-label">完成率</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">520</div>
+                        <div class="stat-label">获得积分</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">7</div>
+                        <div class="stat-label">连续打卡</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <div class="progress-title" style="margin-bottom: 15px;">积分趋势</div>
+                <div style="height: 120px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">
+                    📈 积分稳步上升中！
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <div class="progress-title" style="margin-bottom: 15px;">任务分类统计</div>
+                <div class="task-item">
+                    <div class="task-icon school">📚</div>
+                    <div class="task-content">
+                        <div class="task-name">学校任务</div>
+                        <div class="task-meta">
+                            <span>本周完成 18/20</span>
+                            <span class="task-points">90%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="task-item">
+                    <div class="task-icon home">🏠</div>
+                    <div class="task-content">
+                        <div class="task-name">家庭任务</div>
+                        <div class="task-meta">
+                            <span>本周完成 15/16</span>
+                            <span class="task-points">94%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-item">
+                    <div class="task-icon temp">⚡</div>
+                    <div class="task-content">
+                        <div class="task-name">临时任务</div>
+                        <div class="task-meta">
+                            <span>本周完成 9/12</span>
+                            <span class="task-points">75%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 个人中心页面 -->
+        <div class="page" id="profile">
+            <div class="welcome-section">
+                <div style="position: relative;">
+                    <div class="avatar">👦</div>
+                    <button class="edit-profile-btn" onclick="openProfileEditor()" title="编辑个人资料">✏️</button>
+                </div>
+                <div class="user-name">小明同学</div>
+                <div class="user-level">初中二年级 · 自律达人 Lv.8</div>
+                <div class="points-display">
+                    💎 总积分: 2,340 | 🏆 成就: 12个
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="category-btn" onclick="switchToParentMode()">👩 切换到家长模式</button>
+                </div>
+            </div>
+
+            <div class="section-title">🏆 我的成就</div>
+            <div class="achievement-grid">
+                <div class="achievement-item unlocked">
+                    <div class="achievement-icon">🔥</div>
+                    <div class="achievement-name">连续打卡王</div>
+                    <div class="achievement-desc">连续打卡7天</div>
+                </div>
+                
+                <div class="achievement-item unlocked">
+                    <div class="achievement-icon">📚</div>
+                    <div class="achievement-name">学霸养成</div>
+                    <div class="achievement-desc">完成100个学校任务</div>
+                </div>
+                
+                <div class="achievement-item">
+                    <div class="achievement-icon">⭐</div>
+                    <div class="achievement-name">积分达人</div>
+                    <div class="achievement-desc">累计获得5000积分</div>
+                </div>
+                
+                <div class="achievement-item">
+                    <div class="achievement-icon">🎯</div>
+                    <div class="achievement-name">完美主义</div>
+                    <div class="achievement-desc">单周完成率100%</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <div class="section-title">⚙️ 设置选项</div>
+                <div class="task-item">
+                    <div class="task-icon school">👨‍👩‍👧‍👦</div>
+                    <div class="task-content">
+                        <div class="task-name">家长关联</div>
+                        <div class="task-meta">
+                            <span>已关联: 爸爸妈妈</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="task-item">
+                    <div class="task-icon home">🔔</div>
+                    <div class="task-content">
+                        <div class="task-name">提醒设置</div>
+                        <div class="task-meta">
+                            <span>每日 19:00 提醒打卡</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-item">
+                    <div class="task-icon temp">📊</div>
+                    <div class="task-content">
+                        <div class="task-name">数据导出</div>
+                        <div class="task-meta">
+                            <span>导出学习报告</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 家长管理页面 -->
+        <div class="page" id="parent-mode">
+            <div class="welcome-section">
+                <div class="avatar">👩</div>
+                <div class="user-name">小明妈妈</div>
+                <div class="user-level">家长管理员</div>
+                <div class="points-display">
+                    👦 管理孩子: 小明同学
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="category-btn" onclick="switchToChildMode()">👦 切换到孩子模式</button>
+                </div>
+            </div>
+
+            <div class="section-title">📋 任务管理</div>
+            <div class="task-item" onclick="openTaskPointsManagement()">
+                <div class="task-icon school">🏆</div>
+                <div class="task-content">
+                    <div class="task-name">任务积分管理</div>
+                    <div class="task-meta">
+                        <span>设置各任务的积分奖励</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">🎁 奖励管理</div>
+            <div class="task-item" onclick="showRewardManagement()">
+                <div class="task-icon school">🎁</div>
+                <div class="task-content">
+                    <div class="task-name">管理奖励商品</div>
+                    <div class="task-meta">
+                        <span>当前有 8 个奖励项目</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="task-item">
+                <div class="task-icon home">📊</div>
+                <div class="task-content">
+                    <div class="task-name">孩子数据分析</div>
+                    <div class="task-meta">
+                        <span>查看详细学习报告</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="task-item">
+                <div class="task-icon temp">⏰</div>
+                <div class="task-content">
+                    <div class="task-name">提醒设置</div>
+                    <div class="task-meta">
+                        <span>管理打卡提醒时间</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="task-item">
+                <div class="task-icon school">👨‍👩‍👧‍👦</div>
+                <div class="task-content">
+                    <div class="task-name">家庭成员</div>
+                    <div class="task-meta">
+                        <span>管理家庭成员权限</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 奖励管理页面 -->
+        <div class="page" id="reward-management">
+            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                <button class="category-btn" onclick="backToParentMode()" style="margin-right: 15px;">← 返回</button>
+                <div class="section-title" style="margin: 0; flex: 1;">🎁 奖励管理</div>
+                <button class="category-btn" onclick="showAddReward()">+ 添加</button>
+            </div>
+            
+            <div class="category-buttons" style="margin-bottom: 20px;">
+                <button class="category-btn active" onclick="filterRewards('all')">全部</button>
+                <button class="category-btn" onclick="filterRewards('physical')">实物</button>
+                <button class="category-btn" onclick="filterRewards('experience')">体验</button>
+                <button class="category-btn" onclick="filterRewards('privilege')">特权</button>
+            </div>
+            
+            <div class="reward-list">
+                <div class="task-item reward-item" data-category="physical">
+                     <div class="task-icon school">🎮</div>
+                     <div class="task-content">
+                         <div class="task-name">游戏机30分钟</div>
+                         <div class="task-meta">
+                             <span>需要积分: 200</span>
+                             <span class="task-points">已启用</span>
+                         </div>
+                     </div>
+                     <div class="reward-actions">
+                         <button class="action-btn edit-btn" onclick="editReward(1, '游戏机30分钟', '🎮', 'physical', 200, '可以玩游戏机30分钟')">✏️</button>
+                         <button class="action-btn delete-btn" onclick="deleteReward(1, '游戏机30分钟')">🗑️</button>
+                     </div>
+                 </div>
+                
+                <div class="task-item reward-item" data-category="experience">
+                    <div class="task-icon home">🎬</div>
+                    <div class="task-content">
+                        <div class="task-name">看电影</div>
+                        <div class="task-meta">
+                            <span>需要积分: 300</span>
+                            <span class="task-points">已启用</span>
+                        </div>
+                    </div>
+                    <div class="reward-actions">
+                        <button class="action-btn edit-btn" onclick="editReward(2, '看电影', '🎬', 'experience', 300, '可以看一部电影')">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteReward(2, '看电影')">🗑️</button>
+                    </div>
+                </div>
+                
+                <div class="task-item reward-item" data-category="privilege">
+                    <div class="task-icon temp">🛏️</div>
+                    <div class="task-content">
+                        <div class="task-name">晚睡30分钟</div>
+                        <div class="task-meta">
+                            <span>需要积分: 150</span>
+                            <span class="task-points">已启用</span>
+                        </div>
+                    </div>
+                    <div class="reward-actions">
+                        <button class="action-btn edit-btn" onclick="editReward(3, '晚睡30分钟', '🛏️', 'privilege', 150, '可以比平时晚睡30分钟')">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteReward(3, '晚睡30分钟')">🗑️</button>
+                    </div>
+                </div>
+                
+                <div class="task-item reward-item" data-category="physical">
+                    <div class="task-icon school">🍦</div>
+                    <div class="task-content">
+                        <div class="task-name">冰淇淋</div>
+                        <div class="task-meta">
+                            <span>需要积分: 100</span>
+                            <span style="color: #999;">已禁用</span>
+                        </div>
+                    </div>
+                    <div class="reward-actions">
+                        <button class="action-btn edit-btn" onclick="editReward(4, '冰淇淋', '🍦', 'physical', 100, '美味的冰淇淋')">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteReward(4, '冰淇淋')">🗑️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 添加奖励弹窗 -->
+        <div class="modal" id="add-reward-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 15px; padding: 20px; width: 90%; max-width: 350px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div class="section-title" style="margin: 0;">添加新奖励</div>
+                    <button onclick="closeAddReward()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">奖励名称</label>
+                    <input type="text" class="form-input" id="rewardName" placeholder="请输入奖励名称">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">奖励图标</label>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                        <button class="category-btn active" onclick="selectRewardIcon(this, '🎮')">🎮</button>
+                        <button class="category-btn" onclick="selectRewardIcon(this, '🎬')">🎬</button>
+                        <button class="category-btn" onclick="selectRewardIcon(this, '🍦')">🍦</button>
+                        <button class="category-btn" onclick="selectRewardIcon(this, '🎁')">🎁</button>
+                        <button class="category-btn" onclick="selectRewardIcon(this, '🏆')">🏆</button>
+                        <button class="category-btn" onclick="selectRewardIcon(this, '⭐')">⭐</button>
+                        <button class="category-btn" onclick="selectRewardIcon(this, '🎈')">🎈</button>
+                        <button class="category-btn" onclick="selectRewardIcon(this, '🛏️')">🛏️</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">奖励类型</label>
+                    <div class="category-buttons">
+                        <button class="category-btn active" onclick="selectRewardType(this, 'physical')">实物</button>
+                        <button class="category-btn" onclick="selectRewardType(this, 'experience')">体验</button>
+                        <button class="category-btn" onclick="selectRewardType(this, 'privilege')">特权</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">所需积分</label>
+                    <input type="number" class="form-input" id="rewardPoints" placeholder="请输入所需积分" min="1">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">奖励描述</label>
+                    <textarea class="form-input" id="rewardDescription" rows="3" placeholder="请输入奖励描述（可选）"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="category-btn" onclick="closeAddReward()" style="flex: 1;">取消</button>
+                    <button class="submit-btn" onclick="addNewReward()" style="flex: 1;">添加</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务积分管理页面 -->
+        <div class="page" id="task-points-management" style="display: none;">
+            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                <button class="category-btn" onclick="backToParentMode()" style="margin-right: 15px;">← 返回</button>
+                <div class="section-title" style="margin: 0; flex: 1;">🏆 任务积分管理</div>
+            </div>
+            
+            <div class="category-buttons" style="margin-bottom: 20px;">
+                <button class="category-btn active" onclick="filterTasksByCategory('all')">全部</button>
+                <button class="category-btn" onclick="filterTasksByCategory('school')">学校</button>
+                <button class="category-btn" onclick="filterTasksByCategory('home')">家庭</button>
+                <button class="category-btn" onclick="filterTasksByCategory('temp')">临时</button>
+            </div>
+            
+            <div class="task-points-list">
+                <!-- 学校任务 -->
+                <div class="task-item task-points-item" data-category="school">
+                    <div class="task-icon school">📚</div>
+                    <div class="task-content">
+                        <div class="task-name">完成数学作业</div>
+                        <div class="task-meta">
+                            <span>学校任务</span>
+                            <span class="task-points">当前: 1积分</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" onclick="editTaskPoints('完成数学作业', 1)">✏️</button>
+                    </div>
+                </div>
+
+                <div class="task-item task-points-item" data-category="school">
+                    <div class="task-icon school">📖</div>
+                    <div class="task-content">
+                        <div class="task-name">预习明天英语课文</div>
+                        <div class="task-meta">
+                            <span>学校任务</span>
+                            <span class="task-points">当前: 1积分</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" onclick="editTaskPoints('预习明天英语课文', 1)">✏️</button>
+                    </div>
+                </div>
+
+                <div class="task-item task-points-item" data-category="school">
+                    <div class="task-icon school">🏃</div>
+                    <div class="task-content">
+                        <div class="task-name">体育锻炼30分钟</div>
+                        <div class="task-meta">
+                            <span>学校任务</span>
+                            <span class="task-points">当前: 1积分</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" onclick="editTaskPoints('体育锻炼30分钟', 1)">✏️</button>
+                    </div>
+                </div>
+
+                <!-- 家庭任务 -->
+                <div class="task-item task-points-item" data-category="home">
+                    <div class="task-icon home">🏠</div>
+                    <div class="task-content">
+                        <div class="task-name">整理自己的房间</div>
+                        <div class="task-meta">
+                            <span>家庭任务</span>
+                            <span class="task-points">当前: 1积分</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" onclick="editTaskPoints('整理自己的房间', 1)">✏️</button>
+                    </div>
+                </div>
+
+                <div class="task-item task-points-item" data-category="home">
+                    <div class="task-icon home">🍽️</div>
+                    <div class="task-content">
+                        <div class="task-name">帮妈妈洗碗</div>
+                        <div class="task-meta">
+                            <span>家庭任务</span>
+                            <span class="task-points">当前: 1积分</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" onclick="editTaskPoints('帮妈妈洗碗', 1)">✏️</button>
+                    </div>
+                </div>
+
+                <!-- 临时任务 -->
+                <div class="task-item task-points-item" data-category="temp">
+                    <div class="task-icon temp">📚</div>
+                    <div class="task-content">
+                        <div class="task-name">准备明天的演讲稿</div>
+                        <div class="task-meta">
+                            <span>临时任务</span>
+                            <span class="task-points">当前: 1积分</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="action-btn edit-btn" onclick="editTaskPoints('准备明天的演讲稿', 1)">✏️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 编辑任务积分弹窗 -->
+        <div class="modal" id="edit-task-points-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 15px; padding: 20px; width: 90%; max-width: 350px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div class="section-title" style="margin: 0;">修改任务积分</div>
+                    <button onclick="closeEditTaskPoints()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">任务名称</label>
+                    <div style="padding: 12px 15px; background: #f8f9fa; border-radius: 10px; color: #666; font-size: 16px;" id="editTaskName">
+                        任务名称
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">积分奖励</label>
+                    <input type="number" class="form-input" id="editTaskPointsInput" placeholder="请输入积分数量" min="1" max="100" value="1">
+                    <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                        建议范围：1-10积分（日常任务），10-50积分（重要任务），50-100积分（特殊任务）
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="category-btn" onclick="closeEditTaskPoints()" style="flex: 1;">取消</button>
+                    <button class="submit-btn" onclick="saveTaskPoints()" style="flex: 1;">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 编辑个人资料弹窗 -->
+        <div class="modal" id="edit-profile-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 15px; padding: 20px; width: 90%; max-width: 350px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div class="section-title" style="margin: 0;">编辑个人资料</div>
+                    <button onclick="closeProfileEditor()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">选择头像</label>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px;">
+                        <button class="avatar-option active" onclick="selectAvatar(this, '👦')" style="width: 50px; height: 50px; border-radius: 50%; background: #f0f0f0; border: 2px solid #007AFF; font-size: 20px; cursor: pointer;">👦</button>
+                        <button class="avatar-option" onclick="selectAvatar(this, '👧')" style="width: 50px; height: 50px; border-radius: 50%; background: #f0f0f0; border: 2px solid #ddd; font-size: 20px; cursor: pointer;">👧</button>
+                        <button class="avatar-option" onclick="selectAvatar(this, '🧑')" style="width: 50px; height: 50px; border-radius: 50%; background: #f0f0f0; border: 2px solid #ddd; font-size: 20px; cursor: pointer;">🧑</button>
+                        <button class="avatar-option" onclick="selectAvatar(this, '👨')" style="width: 50px; height: 50px; border-radius: 50%; background: #f0f0f0; border: 2px solid #ddd; font-size: 20px; cursor: pointer;">👨</button>
+                        <button class="avatar-option" onclick="selectAvatar(this, '👩')" style="width: 50px; height: 50px; border-radius: 50%; background: #f0f0f0; border: 2px solid #ddd; font-size: 20px; cursor: pointer;">👩</button>
+                        <button class="avatar-option" onclick="selectAvatar(this, '🧒')" style="width: 50px; height: 50px; border-radius: 50%; background: #f0f0f0; border: 2px solid #ddd; font-size: 20px; cursor: pointer;">🧒</button>
+                        <button class="avatar-option" onclick="selectAvatar(this, '🐱')" style="width: 50px; height: 50px; border-radius: 50%; background: #f0f0f0; border: 2px solid #ddd; font-size: 20px; cursor: pointer;">🐱</button>
+                        <button class="avatar-option" onclick="selectAvatar(this, '🐶')" style="width: 50px; height: 50px; border-radius: 50%; background: #f0f0f0; border: 2px solid #ddd; font-size: 20px; cursor: pointer;">🐶</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">姓名</label>
+                    <input type="text" class="form-input" id="profileName" placeholder="请输入姓名" value="小明同学">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">年级</label>
+                    <select class="form-input" id="profileGrade">
+                        <option value="小学一年级">小学一年级</option>
+                        <option value="小学二年级">小学二年级</option>
+                        <option value="小学三年级">小学三年级</option>
+                        <option value="小学四年级">小学四年级</option>
+                        <option value="小学五年级">小学五年级</option>
+                        <option value="小学六年级">小学六年级</option>
+                        <option value="初中一年级">初中一年级</option>
+                        <option value="初中二年级" selected>初中二年级</option>
+                        <option value="初中三年级">初中三年级</option>
+                        <option value="高中一年级">高中一年级</option>
+                        <option value="高中二年级">高中二年级</option>
+                        <option value="高中三年级">高中三年级</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">个性称号</label>
+                    <select class="form-input" id="profileTitle">
+                        <option value="学习新手">学习新手</option>
+                        <option value="努力学霸">努力学霸</option>
+                        <option value="自律达人" selected>自律达人</option>
+                        <option value="时间管理大师">时间管理大师</option>
+                        <option value="完美主义者">完美主义者</option>
+                        <option value="积分收集家">积分收集家</option>
+                        <option value="习惯养成王">习惯养成王</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="category-btn" onclick="closeProfileEditor()" style="flex: 1;">取消</button>
+                    <button class="submit-btn" onclick="saveProfile()" style="flex: 1;">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 积分商城页面 -->
+        <div class="page" id="shop">
+            <div class="section-title">🛍️ 积分商城</div>
+            
+            <div class="stats-card">
+                <div class="progress-title" style="margin-bottom: 15px;">我的积分钱包</div>
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 36px; font-weight: 700; color: #007AFF; margin-bottom: 10px;">2,340</div>
+                    <div style="color: #666;">可用积分</div>
+                </div>
+            </div>
+
+            <div class="section-title">🎁 虚拟奖励</div>
+            <div class="achievement-grid">
+                <div class="achievement-item">
+                    <div class="achievement-icon">🎨</div>
+                    <div class="achievement-name">新头像</div>
+                    <div class="achievement-desc">100积分</div>
+                </div>
+                
+                <div class="achievement-item">
+                    <div class="achievement-icon">🌈</div>
+                    <div class="achievement-name">彩虹主题</div>
+                    <div class="achievement-desc">200积分</div>
+                </div>
+                
+                <div class="achievement-item">
+                    <div class="achievement-icon">👑</div>
+                    <div class="achievement-name">专属称号</div>
+                    <div class="achievement-desc">500积分</div>
+                </div>
+                
+                <div class="achievement-item">
+                    <div class="achievement-icon">🎵</div>
+                    <div class="achievement-name">打卡音效</div>
+                    <div class="achievement-desc">150积分</div>
+                </div>
+            </div>
+
+            <div class="section-title">🎯 实物奖励</div>
+            <div class="task-item">
+                <div class="task-icon school">📱</div>
+                <div class="task-content">
+                    <div class="task-name">额外手机时间 30分钟</div>
+                    <div class="task-meta">
+                        <span>需要 300积分</span>
+                        <span class="task-points">家长设置</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="task-item">
+                <div class="task-icon home">🍕</div>
+                <div class="task-content">
+                    <div class="task-name">选择今晚晚餐</div>
+                    <div class="task-meta">
+                        <span>需要 200积分</span>
+                        <span class="task-points">家长设置</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="task-item">
+                <div class="task-icon temp">🎬</div>
+                <div class="task-content">
+                    <div class="task-name">周末看电影</div>
+                    <div class="task-meta">
+                        <span>需要 500积分</span>
+                        <span class="task-points">家长设置</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航 -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchPage('home', this)">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">首页</div>
+            </div>
+            <div class="nav-item" onclick="switchPage('tasks', this)">
+                <div class="nav-icon">➕</div>
+                <div class="nav-label">任务</div>
+            </div>
+            <div class="nav-item" onclick="switchPage('stats', this)">
+                <div class="nav-icon">📊</div>
+                <div class="nav-label">统计</div>
+            </div>
+            <div class="nav-item" onclick="switchPage('profile', this)">
+                <div class="nav-icon">👤</div>
+                <div class="nav-label">我的</div>
+            </div>
+            <div class="nav-item" onclick="switchPage('shop', this)">
+                <div class="nav-icon">🛍️</div>
+                <div class="nav-label">商城</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 判断任务是否为当天任务
+        function isTodayTask(taskElement) {
+            const taskMeta = taskElement.querySelector('.task-meta');
+            if (!taskMeta) return false;
+            
+            const metaText = taskMeta.textContent;
+            const today = new Date();
+            const dayOfWeek = today.getDay(); // 0=周日, 1=周一, ..., 6=周六
+            const dayOfMonth = today.getDate();
+            
+            // 每日任务
+            if (metaText.includes('每日任务')) {
+                return true;
+            }
+            
+            // 周任务判断
+            const weekdayMap = {
+                0: '周日', 1: '周一', 2: '周二', 3: '周三', 4: '周四', 5: '周五', 6: '周六'
+            };
+            const todayName = weekdayMap[dayOfWeek];
+            
+            // 检查是否包含今天的星期
+            if (metaText.includes(todayName)) {
+                return true;
+            }
+            
+            // 月任务判断
+            if (metaText.includes('每月') && metaText.includes(dayOfMonth + '号')) {
+                return true;
+            }
+            
+            // 排除明天或其他未来时间的任务
+            if (metaText.includes('明天') || metaText.includes('下周') || metaText.includes('下月')) {
+                return false;
+            }
+            
+            return false;
+        }
+        
+        // 过滤首页任务，只显示当天任务
+        function filterTodayTasks() {
+            const homePage = document.getElementById('home');
+            if (!homePage) return;
+            
+            const taskItems = homePage.querySelectorAll('.task-item');
+            taskItems.forEach(taskItem => {
+                if (isTodayTask(taskItem)) {
+                    taskItem.classList.remove('hidden-task');
+                } else {
+                    taskItem.classList.add('hidden-task');
+                }
+            });
+        }
+
+        // 页面切换功能
+        function switchPage(pageId, navItem) {
+            // 隐藏所有页面
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // 显示目标页面
+            document.getElementById(pageId).classList.add('active');
+            
+            // 更新导航状态
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            navItem.classList.add('active');
+            
+            // 如果切换到首页，过滤显示当天任务
+            if (pageId === 'home') {
+                filterTodayTasks();
+            }
+        }
+
+        // 任务打卡功能
+        function toggleTask(button) {
+            if (button.classList.contains('completed')) {
+                // 取消完成
+                button.classList.remove('completed');
+                button.innerHTML = '';
+                updateProgress(-1);
+            } else {
+                // 标记完成
+                button.classList.add('completed');
+                button.innerHTML = '✓';
+                updateProgress(1);
+                showCelebration();
+                
+                // 更新积分
+                const taskItem = button.closest('.task-item');
+                const pointsElement = taskItem.querySelector('.task-points');
+                const points = parseInt(pointsElement.textContent.match(/\d+/)[0]);
+                updatePoints(points);
+            }
+        }
+
+        // 更新进度
+        function updateProgress(change) {
+            const completedElement = document.getElementById('completedTasks');
+            const totalElement = document.getElementById('totalTasks');
+            
+            let completed = parseInt(completedElement.textContent) + change;
+            let total = parseInt(totalElement.textContent);
+            
+            completed = Math.max(0, Math.min(completed, total));
+            
+            completedElement.textContent = completed;
+            
+            const percentage = (completed / total) * 100;
+            document.querySelector('.progress-fill').style.width = percentage + '%';
+        }
+
+        // 更新积分
+        function updatePoints(points) {
+            const todayPointsElement = document.getElementById('todayPoints');
+            const totalPointsElement = document.getElementById('totalPoints');
+            
+            let todayPoints = parseInt(todayPointsElement.textContent) + points;
+            let totalPoints = parseInt(totalPointsElement.textContent.replace(',', '')) + points;
+            
+            todayPointsElement.textContent = todayPoints;
+            totalPointsElement.textContent = totalPoints.toLocaleString();
+        }
+
+        // 显示庆祝动画
+        function showCelebration() {
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            celebration.innerHTML = '🎉';
+            document.body.appendChild(celebration);
+            
+            setTimeout(() => {
+                document.body.removeChild(celebration);
+            }, 1000);
+        }
+
+        // 分类选择
+        function selectCategory(button, category) {
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+        }
+
+        // 频率选择
+        function selectFrequency(button, frequency) {
+            // 更新按钮状态
+            button.parentElement.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            
+            // 显示/隐藏相应的选项
+            const weeklyOptions = document.getElementById('weeklyOptions');
+            const monthlyOptions = document.getElementById('monthlyOptions');
+            
+            weeklyOptions.style.display = frequency === 'weekly' ? 'block' : 'none';
+            monthlyOptions.style.display = frequency === 'monthly' ? 'block' : 'none';
+        }
+
+        // 星期几选择（可多选）
+        function toggleWeekday(button, day) {
+            button.classList.toggle('active');
+        }
+
+        // 添加任务
+        function addTask() {
+            const taskName = document.getElementById('taskName').value;
+            const taskPoints = document.getElementById('taskPoints').value;
+            
+            if (!taskName.trim()) {
+                alert('请输入任务名称');
+                return;
+            }
+            
+            // 模拟添加任务成功
+            alert(`任务"${taskName}"添加成功！奖励${taskPoints}积分`);
+            
+            // 清空表单
+            document.getElementById('taskName').value = '';
+            document.getElementById('taskPoints').value = '1';
+            document.getElementById('taskDesc').value = '';
+        }
+
+        // 使用模板
+        function useTemplate(name, category, points, frequency) {
+            document.getElementById('taskName').value = name;
+            document.getElementById('taskPoints').value = points;
+            
+            // 选择对应分类
+            const categoryButtons = document.querySelectorAll('.category-buttons')[0].querySelectorAll('.category-btn');
+            categoryButtons.forEach(btn => btn.classList.remove('active'));
+            
+            if (category === 'school') categoryButtons[0].classList.add('active');
+            else if (category === 'home') categoryButtons[1].classList.add('active');
+            else if (category === 'temp') categoryButtons[2].classList.add('active');
+            
+            // 选择对应频率
+            const frequencyButtons = document.querySelectorAll('.category-buttons')[1].querySelectorAll('.category-btn');
+            frequencyButtons.forEach(btn => btn.classList.remove('active'));
+            
+            if (frequency === 'daily') {
+                frequencyButtons[0].classList.add('active');
+                selectFrequency(frequencyButtons[0], 'daily');
+            } else if (frequency === 'weekly') {
+                frequencyButtons[1].classList.add('active');
+                selectFrequency(frequencyButtons[1], 'weekly');
+            } else if (frequency === 'monthly') {
+                frequencyButtons[2].classList.add('active');
+                selectFrequency(frequencyButtons[2], 'monthly');
+            }
+        }
+        
+        // 页面切换函数
+        function showPage(pageId) {
+            // 隐藏所有页面
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // 显示指定页面
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+            
+            // 更新底部导航状态
+            updateNavigation(pageId);
+        }
+        
+        // 更新底部导航状态
+        function updateNavigation(pageId) {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            
+            // 根据页面ID设置对应的导航项为活跃状态
+            if (pageId === 'home') {
+                navItems[0].classList.add('active');
+            } else if (pageId === 'tasks') {
+                navItems[1].classList.add('active');
+            } else if (pageId === 'stats') {
+                navItems[2].classList.add('active');
+            } else if (pageId === 'profile' || pageId === 'parent-mode') {
+                navItems[3].classList.add('active');
+            } else if (pageId === 'shop') {
+                navItems[4].classList.add('active');
+            }
+        }
+
+        // 家长管理功能
+        function switchToParentMode() {
+            verifyParentAccess(() => {
+                showPage('parent-management');
+            });
+        }
+        
+        function switchToChildMode() {
+            showPage('profile');
+        }
+        
+        function showRewardManagement() {
+            showPage('reward-management');
+        }
+        
+        function backToParentMode() {
+            showPage('parent-mode');
+        }
+        
+        function filterRewards(category) {
+            const buttons = document.querySelectorAll('#reward-management .category-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const rewards = document.querySelectorAll('.reward-item');
+            rewards.forEach(reward => {
+                if (category === 'all' || reward.dataset.category === category) {
+                    reward.style.display = 'flex';
+                } else {
+                    reward.style.display = 'none';
+                }
+            });
+        }
+        
+        function showAddReward() {
+            document.getElementById('add-reward-modal').style.display = 'block';
+        }
+        
+        function closeAddReward() {
+            document.getElementById('add-reward-modal').style.display = 'none';
+            
+            // 清空表单（仅在元素存在时）
+            const rewardName = document.getElementById('rewardName');
+            const rewardPoints = document.getElementById('rewardPoints');
+            const rewardDescription = document.getElementById('rewardDescription');
+            
+            if (rewardName) rewardName.value = '';
+            if (rewardPoints) rewardPoints.value = '';
+            if (rewardDescription) rewardDescription.value = '';
+            
+            // 重置弹窗标题和按钮
+            document.querySelector('#add-reward-modal h3').textContent = '添加新奖励';
+            const confirmBtn = document.querySelector('#add-reward-modal .confirm-btn');
+            confirmBtn.textContent = '添加奖励';
+            confirmBtn.onclick = addNewReward;
+            
+            // 清除选中状态
+            document.querySelectorAll('.icon-option.selected').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelectorAll('.type-option.selected').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+        }
+        
+        function selectRewardIcon(button, icon) {
+            const buttons = button.parentElement.querySelectorAll('.category-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+        }
+        
+        function selectRewardType(button, type) {
+            const buttons = button.parentElement.querySelectorAll('.category-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+        }
+        
+        function addNewReward() {
+            const name = document.getElementById('rewardName').value;
+            const points = document.getElementById('rewardPoints').value;
+            const description = document.getElementById('rewardDescription').value;
+            
+            if (!name || !points) {
+                alert('请填写奖励名称和所需积分');
+                return;
+            }
+            
+            // 这里可以添加实际的添加逻辑
+            alert('奖励添加成功！');
+            closeAddReward();
+        }
+        
+        function editReward(id, name, icon, type, points, description) {
+            // 显示添加奖励弹窗（复用作为编辑弹窗）
+            document.getElementById('add-reward-modal').style.display = 'flex';
+            
+            // 填充现有数据
+            document.getElementById('rewardName').value = name;
+            document.getElementById('rewardPoints').value = points;
+            document.getElementById('rewardDescription').value = description;
+            
+            // 设置图标
+            const iconButtons = document.querySelectorAll('.icon-option');
+            iconButtons.forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.textContent === icon) {
+                    btn.classList.add('selected');
+                }
+            });
+            
+            // 设置类型
+            const typeButtons = document.querySelectorAll('.type-option');
+            typeButtons.forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.dataset.type === type) {
+                    btn.classList.add('selected');
+                }
+            });
+            
+            // 修改弹窗标题和按钮文字
+            document.querySelector('#add-reward-modal h3').textContent = '编辑奖励';
+            document.querySelector('#add-reward-modal .confirm-btn').textContent = '保存修改';
+            document.querySelector('#add-reward-modal .confirm-btn').onclick = function() {
+                updateReward(id);
+            };
+        }
+
+        function deleteReward(id, name) {
+            if (confirm('确定要删除奖励"' + name + '"吗？')) {
+                // 找到对应的奖励项目并删除
+                const rewardItems = document.querySelectorAll('.reward-item');
+                rewardItems.forEach(item => {
+                    const editBtn = item.querySelector('.edit-btn');
+                    if (editBtn && editBtn.onclick.toString().includes('editReward(' + id)) {
+                        item.remove();
+                    }
+                });
+                
+                alert('奖励"' + name + '"已删除');
+            }
+        }
+
+        function updateReward(id) {
+            const name = document.getElementById('rewardName').value;
+            const points = document.getElementById('rewardPoints').value;
+            const description = document.getElementById('rewardDescription').value;
+            
+            const selectedIcon = document.querySelector('.icon-option.selected');
+            const selectedType = document.querySelector('.type-option.selected');
+            
+            if (!name || !points || !selectedIcon || !selectedType) {
+                alert('请填写完整信息');
+                return;
+            }
+            
+            // 更新对应的奖励项目
+            const rewardItems = document.querySelectorAll('.reward-item');
+            rewardItems.forEach(item => {
+                const editBtn = item.querySelector('.edit-btn');
+                if (editBtn && editBtn.onclick.toString().includes('editReward(' + id)) {
+                    // 更新显示内容
+                    item.querySelector('.task-icon').textContent = selectedIcon.textContent;
+                    item.querySelector('.task-name').textContent = name;
+                    item.querySelector('.task-meta span:first-child').textContent = '需要积分: ' + points;
+                    
+                    // 更新数据属性
+                    item.dataset.category = selectedType.dataset.type;
+                    
+                    // 更新按钮的onclick参数
+                    editBtn.onclick = function() {
+                        editReward(id, name, selectedIcon.textContent, selectedType.dataset.type, points, description);
+                    };
+                    
+                    const deleteBtn = item.querySelector('.delete-btn');
+                    deleteBtn.onclick = function() {
+                        deleteReward(id, name);
+                    };
+                }
+            });
+            
+            // 关闭弹窗
+            closeAddReward();
+            alert('奖励已更新');
+        }
+
+        // 任务编辑功能
+        function editTask(id, name, icon, category, points, frequency, deadline) {
+            // 显示添加任务弹窗作为编辑弹窗
+            const modal = document.getElementById('add-task-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                
+                // 填充现有数据
+                const taskNameInput = document.getElementById('taskName');
+                const taskPointsInput = document.getElementById('taskPoints');
+                const taskDeadlineInput = document.getElementById('taskDeadline');
+                
+                if (taskNameInput) taskNameInput.value = name;
+                if (taskPointsInput) taskPointsInput.value = points;
+                if (taskDeadlineInput && deadline) {
+                    // 设置截止时间
+                    const today = new Date();
+                    today.setHours(parseInt(deadline.split(':')[0]), parseInt(deadline.split(':')[1]), 0, 0);
+                    taskDeadlineInput.value = today.toISOString().slice(0, 16);
+                }
+                
+                // 设置分类
+                const categoryButtons = document.querySelectorAll('.category-btn');
+                categoryButtons.forEach(btn => {
+                    btn.classList.remove('selected');
+                    if (btn.textContent.includes(getCategoryName(category))) {
+                        btn.classList.add('selected');
+                    }
+                });
+                
+                // 设置频率
+                const frequencyButtons = document.querySelectorAll('.frequency-btn');
+                frequencyButtons.forEach(btn => {
+                    btn.classList.remove('selected');
+                    if (btn.textContent.includes(getFrequencyName(frequency))) {
+                        btn.classList.add('selected');
+                    }
+                });
+                
+                // 修改弹窗标题和按钮文本
+                const modalTitle = modal.querySelector('h3');
+                const confirmBtn = modal.querySelector('.confirm-btn');
+                if (modalTitle) modalTitle.textContent = '编辑任务';
+                if (confirmBtn) {
+                    confirmBtn.textContent = '保存修改';
+                    confirmBtn.onclick = function() {
+                        updateTask(id);
+                    };
+                }
+            }
+        }
+
+        // 任务删除功能
+        function deleteTask(id, name) {
+            if (confirm(`确定要删除任务"${name}"吗？`)) {
+                // 找到对应的任务元素并删除
+                const taskItems = document.querySelectorAll('.task-item');
+                taskItems.forEach(item => {
+                    const taskName = item.querySelector('.task-name');
+                    if (taskName && taskName.textContent === name) {
+                        item.remove();
+                        alert('任务已删除');
+                        return;
+                    }
+                });
+            }
+        }
+
+        // 更新任务功能
+        function updateTask(id) {
+            const taskNameInput = document.getElementById('taskName');
+            const taskPointsInput = document.getElementById('taskPoints');
+            const taskDeadlineInput = document.getElementById('taskDeadline');
+            
+            if (!taskNameInput || !taskNameInput.value.trim()) {
+                alert('请输入任务名称');
+                return;
+            }
+            
+            const name = taskNameInput.value.trim();
+            const points = taskPointsInput ? parseInt(taskPointsInput.value) || 10 : 10;
+            const deadline = taskDeadlineInput ? taskDeadlineInput.value : '';
+            
+            // 获取选中的分类和频率
+            const selectedCategory = document.querySelector('.category-btn.selected');
+            const selectedFrequency = document.querySelector('.frequency-btn.selected');
+            
+            // 找到对应的任务元素并更新
+            const taskItems = document.querySelectorAll('.task-item');
+            taskItems.forEach(item => {
+                const editBtn = item.querySelector('.edit-btn');
+                if (editBtn && editBtn.onclick.toString().includes(`editTask(${id},`)) {
+                    const taskNameEl = item.querySelector('.task-name');
+                    const taskPointsEl = item.querySelector('.task-points');
+                    
+                    if (taskNameEl) taskNameEl.textContent = name;
+                    if (taskPointsEl) taskPointsEl.textContent = `+${points}积分`;
+                    
+                    // 更新按钮的onclick事件
+                    const newCategory = selectedCategory ? getCategoryCode(selectedCategory.textContent) : 'study';
+                    const newFrequency = selectedFrequency ? getFrequencyCode(selectedFrequency.textContent) : 'daily';
+                    const newDeadline = deadline ? new Date(deadline).toTimeString().slice(0, 5) : '20:00';
+                    
+                    editBtn.onclick = function() {
+                        editTask(id, name, '📚', newCategory, points, newFrequency, newDeadline);
+                    };
+                    
+                    const deleteBtn = item.querySelector('.delete-btn');
+                    if (deleteBtn) {
+                        deleteBtn.onclick = function() {
+                            deleteTask(id, name);
+                        };
+                    }
+                }
+            });
+            
+            // 关闭弹窗
+            closeAddTask();
+            alert('任务已更新');
+        }
+
+        // 辅助函数：获取分类名称
+        function getCategoryName(code) {
+            const categoryMap = {
+                'study': '学习任务',
+                'home': '家庭任务',
+                'life': '生活习惯',
+                'temp': '临时任务'
+            };
+            return categoryMap[code] || '学习任务';
+        }
+
+        // 辅助函数：获取频率名称
+        function getFrequencyName(code) {
+            const frequencyMap = {
+                'daily': '每天',
+                'weekly': '每周',
+                'monthly': '每月',
+                'temp': '临时'
+            };
+            return frequencyMap[code] || '每天';
+        }
+
+        // 辅助函数：获取分类代码
+        function getCategoryCode(name) {
+            const categoryMap = {
+                '学习任务': 'study',
+                '家庭任务': 'home',
+                '生活习惯': 'life',
+                '临时任务': 'temp'
+            };
+            return categoryMap[name] || 'study';
+        }
+
+        // 辅助函数：获取频率代码
+        function getFrequencyCode(name) {
+            const frequencyMap = {
+                '每天': 'daily',
+                '每周': 'weekly',
+                '每月': 'monthly',
+                '临时': 'temp'
+            };
+            return frequencyMap[name] || 'daily';
+        }
+
+        // 关闭添加任务弹窗
+        function closeAddTask() {
+            const modal = document.getElementById('add-task-modal');
+            if (modal) {
+                modal.style.display = 'none';
+                
+                // 重置表单
+                const taskNameInput = document.getElementById('taskName');
+                const taskPointsInput = document.getElementById('taskPoints');
+                const taskDeadlineInput = document.getElementById('taskDeadline');
+                
+                if (taskNameInput) taskNameInput.value = '';
+                if (taskPointsInput) taskPointsInput.value = '1';
+                if (taskDeadlineInput) {
+                    const now = new Date();
+                    now.setHours(20, 0, 0, 0);
+                    taskDeadlineInput.value = now.toISOString().slice(0, 16);
+                }
+                
+                // 重置选择状态
+                document.querySelectorAll('.category-btn, .frequency-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                
+                // 重置弹窗标题和按钮
+                const modalTitle = modal.querySelector('h3');
+                const confirmBtn = modal.querySelector('.confirm-btn');
+                if (modalTitle) modalTitle.textContent = '添加新任务';
+                if (confirmBtn) {
+                    confirmBtn.textContent = '添加任务';
+                    confirmBtn.onclick = addTask;
+                }
+            }
+        }
+
+        // 编辑个人资料相关函数
+        function openProfileEditor() {
+            document.getElementById('edit-profile-modal').style.display = 'flex';
+        }
+
+        function closeProfileEditor() {
+            document.getElementById('edit-profile-modal').style.display = 'none';
+        }
+
+        function selectAvatar(button, avatar) {
+            // 移除所有头像选项的active状态
+            document.querySelectorAll('.avatar-option').forEach(option => {
+                option.classList.remove('active');
+                option.style.border = '2px solid #ddd';
+            });
+            
+            // 设置当前选中的头像
+            button.classList.add('active');
+            button.style.border = '2px solid #007AFF';
+        }
+
+        function saveProfile() {
+            // 获取表单数据
+            const selectedAvatar = document.querySelector('.avatar-option.active').textContent;
+            const name = document.getElementById('profileName').value;
+            const grade = document.getElementById('profileGrade').value;
+            const title = document.getElementById('profileTitle').value;
+            
+            // 验证输入
+            if (!name.trim()) {
+                alert('请输入姓名');
+                return;
+            }
+            
+            // 更新页面上的个人信息
+            // 更新头像
+            document.querySelectorAll('.avatar').forEach(avatar => {
+                avatar.textContent = selectedAvatar;
+            });
+            
+            // 更新姓名
+            document.querySelectorAll('.user-name').forEach(nameElement => {
+                if (nameElement.textContent.includes('小明')) {
+                    nameElement.textContent = name;
+                }
+            });
+            
+            // 更新年级和称号
+            document.querySelectorAll('.user-level').forEach(levelElement => {
+                if (levelElement.textContent.includes('初中二年级')) {
+                    levelElement.textContent = `${grade} · ${title} Lv.8`;
+                }
+            });
+            
+            // 显示成功提示
+            alert(`个人资料已更新！\n头像：${selectedAvatar}\n姓名：${name}\n年级：${grade}\n称号：${title}`);
+            
+            // 关闭弹窗
+            closeProfileEditor();
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置默认截止时间为今天晚上8点（仅在元素存在时）
+            const taskDeadlineElement = document.getElementById('taskDeadline');
+            if (taskDeadlineElement) {
+                const now = new Date();
+                now.setHours(20, 0, 0, 0);
+                taskDeadlineElement.value = now.toISOString().slice(0, 16);
+            }
+            
+            // 初始化时过滤首页任务，只显示当天任务
+            filterTodayTasks();
+            
+            // 添加一些交互提示
+            console.log('🎉 每日打卡应用原型已加载！');
+            console.log('💡 您可以点击任务右侧的圆圈来完成打卡');
+            console.log('📱 使用底部导航切换不同页面');
+            console.log('✏️ 点击个人中心的编辑按钮可以修改头像和个人信息');
+            console.log('🎤 点击语音按钮可以语音创建任务');
+        });
+
+        // 语音识别相关功能
+        let recognition = null;
+        let isRecording = false;
+
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'zh-CN';
+                
+                recognition.onstart = function() {
+                    console.log('语音识别开始');
+                    isRecording = true;
+                    updateVoiceUI(true);
+                };
+                
+                recognition.onresult = function(event) {
+                    const result = event.results[0][0].transcript;
+                    console.log('识别结果:', result);
+                    document.getElementById('taskName').value = result;
+                    updateVoiceUI(false);
+                    showVoiceStatus(`识别成功：${result}`, 'success');
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('语音识别错误:', event.error);
+                    updateVoiceUI(false);
+                    let errorMessage = '语音识别失败';
+                    switch(event.error) {
+                        case 'no-speech':
+                            errorMessage = '没有检测到语音，请重试';
+                            break;
+                        case 'audio-capture':
+                            errorMessage = '无法访问麦克风，请检查权限';
+                            break;
+                        case 'not-allowed':
+                            errorMessage = '麦克风权限被拒绝，请在浏览器设置中允许';
+                            break;
+                        case 'network':
+                            errorMessage = '网络错误，请检查网络连接';
+                            break;
+                    }
+                    showVoiceStatus(errorMessage, 'error');
+                };
+                
+                recognition.onend = function() {
+                    console.log('语音识别结束');
+                    isRecording = false;
+                    updateVoiceUI(false);
+                };
+                
+                return true;
+            } else {
+                console.warn('浏览器不支持语音识别');
+                return false;
+            }
+        }
+
+        function toggleVoiceInput() {
+            if (!recognition && !initSpeechRecognition()) {
+                showVoiceStatus('您的浏览器不支持语音识别功能', 'error');
+                return;
+            }
+            
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                recognition.start();
+                showVoiceStatus('正在聆听，请说话...', 'listening');
+            }
+        }
+
+        function updateVoiceUI(recording) {
+            const voiceBtn = document.getElementById('voiceBtn');
+            if (recording) {
+                voiceBtn.classList.add('recording');
+                voiceBtn.textContent = '⏹️';
+                voiceBtn.title = '点击停止录音';
+            } else {
+                voiceBtn.classList.remove('recording');
+                voiceBtn.textContent = '🎤';
+                voiceBtn.title = '语音输入';
+            }
+        }
+
+        function showVoiceStatus(message, type) {
+            const statusDiv = document.getElementById('voiceStatus');
+            const statusText = document.getElementById('voiceStatusText');
+            
+            statusText.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            // 根据类型设置不同的样式
+            switch(type) {
+                case 'listening':
+                    statusDiv.style.background = '#f0f8ff';
+                    statusDiv.style.color = '#007AFF';
+                    break;
+                case 'success':
+                    statusDiv.style.background = '#f0fff4';
+                    statusDiv.style.color = '#34c759';
+                    break;
+                case 'error':
+                    statusDiv.style.background = '#fff5f5';
+                    statusDiv.style.color = '#ff3b30';
+                    break;
+            }
+            
+            // 3秒后自动隐藏状态信息（除了listening状态）
+            if (type !== 'listening') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // 家长身份验证相关函数
+        function verifyParentAccess(callback) {
+            const password = prompt('请输入家长密码以继续操作：');
+            
+            // 简单的密码验证（实际应用中应该使用更安全的方式）
+            if (password === '123456') {
+                // 切换到家长模式
+                document.body.classList.remove('student-mode');
+                document.body.classList.add('parent-mode');
+                
+                if (callback) callback();
+                console.log('家长身份验证成功');
+            } else if (password !== null) {
+                alert('密码错误，无法进入家长管理模式');
+                console.log('家长身份验证失败');
+            }
+        }
+
+        function switchToStudentMode() {
+            document.body.classList.remove('parent-mode');
+            document.body.classList.add('student-mode');
+            console.log('切换到学生模式');
+        }
+
+        // 任务积分管理相关函数
+        function openTaskPointsManagement() {
+            verifyParentAccess(() => {
+                hideAllPages();
+                document.getElementById('task-points-management').style.display = 'block';
+                console.log('打开任务积分管理页面');
+            });
+        }
+
+        function backToParentMode() {
+            hideAllPages();
+            document.getElementById('parent-management').style.display = 'block';
+            console.log('返回家长管理页面');
+        }
+
+        function filterTasksByCategory(category) {
+            // 更新按钮状态
+            document.querySelectorAll('#task-points-management .category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // 过滤任务显示
+            const taskItems = document.querySelectorAll('.task-points-item');
+            taskItems.forEach(item => {
+                if (category === 'all' || item.dataset.category === category) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            console.log('筛选任务类别:', category);
+        }
+
+        let currentEditingTask = null;
+
+        function editTaskPoints(taskName, currentPoints) {
+            currentEditingTask = taskName;
+            document.getElementById('editTaskName').textContent = taskName;
+            document.getElementById('editTaskPointsInput').value = currentPoints;
+            document.getElementById('edit-task-points-modal').style.display = 'block';
+            console.log('编辑任务积分:', taskName, currentPoints);
+        }
+
+        function closeEditTaskPoints() {
+            document.getElementById('edit-task-points-modal').style.display = 'none';
+            currentEditingTask = null;
+        }
+
+        function saveTaskPoints() {
+            const newPoints = document.getElementById('editTaskPointsInput').value;
+            
+            if (!newPoints || newPoints < 1 || newPoints > 100) {
+                alert('请输入有效的积分数量（1-100）');
+                return;
+            }
+
+            // 更新对应任务的积分显示
+            const taskItems = document.querySelectorAll('.task-points-item');
+            taskItems.forEach(item => {
+                const taskNameElement = item.querySelector('.task-name');
+                if (taskNameElement && taskNameElement.textContent === currentEditingTask) {
+                    const pointsElement = item.querySelector('.task-points');
+                    pointsElement.textContent = `当前: ${newPoints}积分`;
+                    
+                    // 更新编辑按钮的onclick参数
+                    const editBtn = item.querySelector('.edit-btn');
+                    editBtn.onclick = () => editTaskPoints(currentEditingTask, newPoints);
+                }
+            });
+
+            // 显示成功提示
+            alert(`任务"${currentEditingTask}"的积分已更新为${newPoints}分`);
+            
+            closeEditTaskPoints();
+            console.log('保存任务积分:', currentEditingTask, newPoints);
+        }
+    </script>
+</body>
+</html>
