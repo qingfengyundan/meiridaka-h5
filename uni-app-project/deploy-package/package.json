@@ -1,92 +1,30 @@
 {
-  "name": "meiridaka",
+  "name": "meiridaka-h5",
   "version": "1.0.0",
-  "description": "培养自律好习惯的每日打卡应用",
-  "main": "main.js",
+  "description": "培养自律好习惯的每日打卡应用 - H5版本",
+  "main": "index.html",
   "scripts": {
-    "serve": "npm run dev:h5",
-    "build": "npm run build:h5",
-    "vercel-build": "npm run build:h5",
-    "build:app-android": "cross-env NODE_ENV=production UNI_PLATFORM=app-android vue-cli-service uni-build",
-    "build:app-ios": "cross-env NODE_ENV=production UNI_PLATFORM=app-ios vue-cli-service uni-build",
-    "build:custom": "cross-env NODE_ENV=production uniapp-cli custom",
-    "build:h5": "cross-env NODE_ENV=production UNI_PLATFORM=h5 vue-cli-service uni-build",
-    "build:mp-360": "cross-env NODE_ENV=production UNI_PLATFORM=mp-360 vue-cli-service uni-build",
-    "build:mp-alipay": "cross-env NODE_ENV=production UNI_PLATFORM=mp-alipay vue-cli-service uni-build",
-    "build:mp-baidu": "cross-env NODE_ENV=production UNI_PLATFORM=mp-baidu vue-cli-service uni-build",
-    "build:mp-kuaishou": "cross-env NODE_ENV=production UNI_PLATFORM=mp-kuaishou vue-cli-service uni-build",
-    "build:mp-lark": "cross-env NODE_ENV=production UNI_PLATFORM=mp-lark vue-cli-service uni-build",
-    "build:mp-qq": "cross-env NODE_ENV=production UNI_PLATFORM=mp-qq vue-cli-service uni-build",
-    "build:mp-toutiao": "cross-env NODE_ENV=production UNI_PLATFORM=mp-toutiao vue-cli-service uni-build",
-    "build:mp-weixin": "cross-env NODE_ENV=production UNI_PLATFORM=mp-weixin vue-cli-service uni-build",
-    "build:mp-xhs": "cross-env NODE_ENV=production UNI_PLATFORM=mp-xhs vue-cli-service uni-build",
-    "build:quickapp-native": "cross-env NODE_ENV=production UNI_PLATFORM=quickapp-native vue-cli-service uni-build",
-    "build:quickapp-webview": "cross-env NODE_ENV=production UNI_PLATFORM=quickapp-webview vue-cli-service uni-build",
-    "dev:app-android": "cross-env NODE_ENV=development UNI_PLATFORM=app-android vue-cli-service uni-build --watch",
-    "dev:app-ios": "cross-env NODE_ENV=development UNI_PLATFORM=app-ios vue-cli-service uni-build --watch",
-    "dev:custom": "cross-env NODE_ENV=development uniapp-cli custom",
-    "dev:h5": "cross-env NODE_ENV=development UNI_PLATFORM=h5 vue-cli-service uni-serve",
-    "dev:mp-360": "cross-env NODE_ENV=development UNI_PLATFORM=mp-360 vue-cli-service uni-build --watch",
-    "dev:mp-alipay": "cross-env NODE_ENV=development UNI_PLATFORM=mp-alipay vue-cli-service uni-build --watch",
-    "dev:mp-baidu": "cross-env NODE_ENV=development UNI_PLATFORM=mp-baidu vue-cli-service uni-build --watch",
-    "dev:mp-kuaishou": "cross-env NODE_ENV=development UNI_PLATFORM=mp-kuaishou vue-cli-service uni-build --watch",
-    "dev:mp-lark": "cross-env NODE_ENV=development UNI_PLATFORM=mp-lark vue-cli-service uni-build --watch",
-    "dev:mp-qq": "cross-env NODE_ENV=development UNI_PLATFORM=mp-qq vue-cli-service uni-build --watch",
-    "dev:mp-toutiao": "cross-env NODE_ENV=development UNI_PLATFORM=mp-toutiao vue-cli-service uni-build --watch",
-    "dev:mp-weixin": "cross-env NODE_ENV=development UNI_PLATFORM=mp-weixin vue-cli-service uni-build --watch",
-    "dev:mp-xhs": "cross-env NODE_ENV=development UNI_PLATFORM=mp-xhs vue-cli-service uni-build --watch",
-    "dev:quickapp-native": "cross-env NODE_ENV=development UNI_PLATFORM=quickapp-native vue-cli-service uni-build --watch",
-    "dev:quickapp-webview": "cross-env NODE_ENV=development UNI_PLATFORM=quickapp-webview vue-cli-service uni-build --watch",
-    "info": "node node_modules/@dcloudio/vue-cli-plugin-uni/commands/info.js",
-    "serve:quickapp-native": "node node_modules/@dcloudio/uni-quickapp-native/bin/serve.js",
-    "test:android": "cross-env UNI_PLATFORM=app-android jest",
-    "test:h5": "cross-env UNI_PLATFORM=h5 jest",
-    "test:ios": "cross-env UNI_PLATFORM=app-ios jest",
-    "test:mp-baidu": "cross-env UNI_PLATFORM=mp-baidu jest",
-    "test:mp-weixin": "cross-env UNI_PLATFORM=mp-weixin jest"
+    "start": "serve -s .",
+    "build": "echo 'Static files ready for deployment'",
+    "dev": "serve -s . -p 3000"
   },
   "keywords": [
-    "uni-app",
-    "vue",
-    "mobile",
-    "miniprogram",
     "habit",
-    "checkin"
+    "checkin",
+    "h5",
+    "webapp",
+    "daily"
   ],
   "author": "每日打卡团队",
   "license": "MIT",
-  "dependencies": {
-    "@dcloudio/uni-app": "^2.0.2",
-    "@dcloudio/uni-components": "^2.0.2",
-    "@dcloudio/uni-h5": "^2.0.2",
-    "@dcloudio/uni-mp-alipay": "^2.0.2",
-    "@dcloudio/uni-mp-baidu": "^2.0.2",
-    "@dcloudio/uni-mp-qq": "^2.0.2",
-    "@dcloudio/uni-mp-toutiao": "^2.0.2",
-    "@dcloudio/uni-mp-weixin": "^2.0.2",
-    "@dcloudio/uni-quickapp-webview": "^2.0.2",
-    "vue": "^2.6.14"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@dcloudio/types": "^2.0.2",
-    "@dcloudio/uni-automator": "^2.0.2",
-    "@dcloudio/uni-cli-shared": "^2.0.2",
-    "@dcloudio/uni-stacktracey": "^2.0.2",
-    "@dcloudio/vue-cli-plugin-uni": "^2.0.2",
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-service": "~4.5.0",
-    "babel-plugin-import": "^1.13.0",
-    "cross-env": "^7.0.2",
-    "jest": "^25.4.0",
-    "mini-types": "*",
-    "miniprogram-api-typings": "*",
-    "postcss-comment": "^2.0.0"
+    "serve": "^14.0.0"
   },
   "browserslist": [
     "Android >= 4.4",
-    "ios >= 9"
-  ],
-  "uni-app": {
-    "scripts": {}
-  }
+    "ios >= 9",
+    "> 1%",
+    "last 2 versions"
+  ]
 }
