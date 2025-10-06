@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>每日打卡</title>
+    <title>学生自律培养神器</title>
     <style>
         * {
             margin: 0;
@@ -64,6 +64,13 @@
         .header h1 {
             font-size: 1.8em;
             margin-bottom: 5px;
+        }
+        
+        .header .slogan {
+            opacity: 0.8;
+            font-size: 0.9em;
+            color: #007AFF;
+            margin-top: 5px;
         }
         
         .header .date {
@@ -164,11 +171,27 @@
             color: #666;
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
         }
         
         .task-points {
             color: #f59e0b;
             font-weight: 500;
+        }
+        
+        .deadline {
+            color: #10b981;
+            font-size: 0.85em;
+            padding: 2px 6px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+        
+        .deadline.overdue {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
         }
         
         .task-actions {
@@ -180,20 +203,46 @@
         .btn-complete, .btn-edit, .btn-delete {
             background: none;
             border: none;
-            font-size: 1.2em;
+            font-size: 1.4em;
             cursor: pointer;
-            padding: 6px;
-            border-radius: 6px;
-            transition: all 0.2s;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 32px;
-            height: 32px;
+            min-width: 40px;
+            height: 40px;
+            position: relative;
+            overflow: hidden;
         }
         
-        .btn-complete:hover {
-            background: #f0f9ff;
+        /* 未完成任务的圆圈样式 */
+        .btn-complete:not(:disabled) {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            border: 3px solid #fff;
+        }
+        
+        .btn-complete:not(:disabled):hover {
+            background: linear-gradient(135deg, #ff5252, #ff7979);
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        /* 已完成任务的勾选样式 */
+        .btn-complete:disabled {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+            border: 3px solid #fff;
+            animation: completePulse 2s ease-in-out;
+        }
+        
+        .btn-complete:disabled:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
         }
         
         .btn-edit {
@@ -217,6 +266,124 @@
         .btn-complete:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        /* 增强的打卡按钮样式 */
+        .check-btn {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 60px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        .check-btn:hover {
+            background: #0056CC;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        .check-btn.checking-in {
+            background: #FF9500;
+            animation: pulse 1s infinite;
+            cursor: not-allowed;
+        }
+
+        .check-btn.completed {
+            background: #28a745;
+            color: white;
+        }
+
+        .check-btn.completed:hover {
+            background: #1e7e34;
+            transform: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* 完成任务时的脉冲动画 */
+        @keyframes completePulse {
+            0% { 
+                transform: scale(1);
+                box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+            }
+            50% { 
+                transform: scale(1.1);
+                box-shadow: 0 8px 25px rgba(78, 205, 196, 0.5);
+            }
+            100% { 
+                transform: scale(1);
+                box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+            }
+        }
+        
+        /* 点击时的波纹效果 */
+        @keyframes ripple {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        .btn-complete::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn-complete:active::before {
+            width: 300px;
+            height: 300px;
+            animation: ripple 0.6s ease-out;
+        }
+        
+        /* 悬浮时的发光效果 */
+        .btn-complete:not(:disabled):hover {
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3), 0 0 20px rgba(255, 107, 107, 0.2);
+            }
+            to {
+                box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4), 0 0 30px rgba(255, 107, 107, 0.3);
+            }
+        }
+
+        /* 任务项完成状态样式 */
+        .task-item.completed {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+        }
+
+        .task-item.completed .task-title {
+            text-decoration: line-through;
+            color: #6c757d;
         }
         
         .add-task {
@@ -639,6 +806,66 @@
             font-weight: 500;
         }
         
+        /* 月度统计样式 */
+        .monthly-stats {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .monthly-stats-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .monthly-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        
+        .monthly-stat-item {
+            background: white;
+            padding: 15px 10px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .monthly-stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #007AFF;
+            margin-bottom: 5px;
+        }
+        
+        .monthly-stat-label {
+            font-size: 0.8em;
+            color: #666;
+        }
+        
+        /* 首页任务区域样式 */
+        .home-tasks-section {
+            padding: 20px;
+            background: white;
+        }
+        
+        .home-tasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .home-tasks-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+        }
+        
         .progress-section {
             padding: 20px;
             background: white;
@@ -895,12 +1122,24 @@
             border-color: rgba(255,255,255,0.5);
         }
         
-        .shop-categories {
+        .shop-categories, .task-categories {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
             overflow-x: auto;
             padding-bottom: 5px;
+            flex-wrap: nowrap;
+        }
+        
+        .task-categories {
+            justify-content: space-between;
+            gap: 8px;
+        }
+        
+        .task-categories .category-btn {
+            flex: 1;
+            text-align: center;
+            min-width: 0;
         }
         
         .category-btn {
@@ -1281,9 +1520,11 @@
 
         .data-analysis {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 15px;
             margin-bottom: 15px;
+            width: 100%;
+            min-width: 0;
         }
 
         .analysis-item {
@@ -1291,6 +1532,8 @@
             padding: 15px;
             background: #f8f9fa;
             border-radius: 8px;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .analysis-label {
@@ -1370,6 +1613,14 @@
             gap: 15px;
         }
 
+        .summary-stats-three {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 100%;
+            min-width: 0;
+        }
+
         .summary-stats-row {
             display: flex;
             gap: 15px;
@@ -1381,7 +1632,13 @@
             min-width: 120px;
         }
 
-        @media (max-width: 768px) {
+        .summary-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        @media (max-width: 480px) {
             .summary-stats {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -1391,6 +1648,45 @@
                 grid-template-columns: repeat(2, 1fr);
                 gap: 10px;
             }
+
+            .summary-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .data-analysis {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+
+            .summary-stats-three {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+
+            .analysis-item {
+                padding: 8px;
+            }
+
+            .analysis-label {
+                font-size: 12px;
+            }
+
+            .analysis-value {
+                font-size: 18px;
+            }
+
+            .summary-item {
+                padding: 8px;
+            }
+
+            .summary-label {
+                font-size: 10px;
+            }
+
+            .summary-value {
+                font-size: 16px;
+            }
         }
 
         .summary-item {
@@ -1399,6 +1695,8 @@
             background: white;
             border-radius: 6px;
             border: 1px solid #e9ecef;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .summary-label {
@@ -2342,68 +2640,178 @@
 <body>
     <div class="app">
         <div class="header">
-            <h1>📅 每日打卡</h1>
+            <h1>学生自律培养神器</h1>
+            <div class="slogan">优秀来自孩子自律习惯</div>
             <div class="date" id="currentDate"></div>
         </div>
         
-        <div class="stats">
-            <div class="stat-item">
-                <div class="stat-number" id="totalTasks">0</div>
-                <div class="stat-label">总任务</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" id="completedTasks">0</div>
-                <div class="stat-label">已完成</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" id="pendingTasks">0</div>
-                <div class="stat-label">待完成</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" id="totalPoints">0</div>
-                <div class="stat-label">总积分</div>
-            </div>
-        </div>
+
         
         <!-- 首页 -->
         <div class="page active" id="homePage">
+            <!-- 用户信息区域 -->
             <div class="welcome-section">
                 <button class="edit-profile-btn" onclick="editProfile()">✏️</button>
                 <div class="avatar" id="userAvatar">👤</div>
                 <div class="user-name" id="userName">小明</div>
                 <div class="user-level" id="userLevel">Lv.1 新手</div>
-                <div class="points-display">当前积分：<span id="homePoints">0</span></div>
+                <div class="points-display">累计总积分：<span id="homePoints">0</span></div>
             </div>
             
-            <div class="progress-section">
-                <div class="progress-title">今日进度</div>
-                <div class="progress-bar-container">
-                    <div class="progress-bar" id="dailyProgress" style="width: 0%"></div>
+            <!-- 本月统计 -->
+            <div class="monthly-stats">
+                <h3 class="monthly-stats-title">📊 本月统计</h3>
+                <div class="monthly-stats-grid">
+                    <div class="monthly-stat-item">
+                        <div class="monthly-stat-number" id="monthlyTotalTasks">0</div>
+                        <div class="monthly-stat-label">总任务</div>
+                    </div>
+                    <div class="monthly-stat-item">
+                        <div class="monthly-stat-number" id="monthlyCompletedTasks">0</div>
+                        <div class="monthly-stat-label">已完成</div>
+                    </div>
+                    <div class="monthly-stat-item">
+                        <div class="monthly-stat-number" id="monthlyPendingTasks">0</div>
+                        <div class="monthly-stat-label">待完成</div>
+                    </div>
+                    <div class="monthly-stat-item">
+                        <div class="monthly-stat-number" id="monthlyTotalPoints">0</div>
+                        <div class="monthly-stat-label">总积分</div>
+                    </div>
                 </div>
-                <div class="progress-text" id="progressText">0/0 任务完成</div>
             </div>
-            
-            <div class="quick-stats">
-                <div class="quick-stat-item">
-                    <div class="quick-stat-number" id="quickTotalTasks">0</div>
-                    <div class="quick-stat-label">总任务</div>
+
+            <!-- 我的任务 -->
+            <div class="home-tasks-section">
+                <div class="home-tasks-header">
+                    <h2 class="home-tasks-title">📝 我的任务</h2>
+                    <button class="add-task-btn-new" onclick="showAddTaskModal()">
+                        <span class="add-icon">+</span>
+                        <span class="add-text">添加</span>
+                    </button>
                 </div>
-                <div class="quick-stat-item">
-                    <div class="quick-stat-number" id="quickCompletedTasks">0</div>
-                    <div class="quick-stat-label">已完成</div>
+                
+                <div class="task-categories">
+                    <button class="category-btn active" onclick="filterTasks('all')">全部</button>
+                    <button class="category-btn" onclick="filterTasks('school')">学校</button>
+                    <button class="category-btn" onclick="filterTasks('home')">家庭</button>
+                    <button class="category-btn" onclick="filterTasks('temp')">临时</button>
                 </div>
-                <div class="quick-stat-item">
-                    <div class="quick-stat-number" id="quickStreakDays">0</div>
-                    <div class="quick-stat-label">连续天数</div>
-                </div>
-            </div>
-            
-            <div class="recent-achievements">
-                <div class="section-title">🏆 最新成就</div>
-                <div class="achievement-list" id="recentAchievements">
-                    <div class="empty-state">
-                        <div class="empty-icon">🏆</div>
-                        <p>暂无成就，完成任务解锁更多成就！</p>
+                
+                <div class="task-list" id="homeTaskList">
+                    <!-- 学校任务 -->
+                    <div class="task-item" data-category="school">
+                        <div class="task-icon school">📚</div>
+                        <div class="task-content">
+                            <div class="task-name">完成数学作业</div>
+                            <div class="task-meta">
+                                <span>每日任务</span>
+                                <span class="task-points">+20积分</span>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="check-btn" onclick="toggleTask(this)">✓</button>
+                        </div>
+                    </div>
+                    
+                    <div class="task-item" data-category="school">
+                        <div class="task-icon school">📝</div>
+                        <div class="task-content">
+                            <div class="task-name">背诵英语单词</div>
+                            <div class="task-meta">
+                                <span>每日任务</span>
+                                <span class="task-points">+15积分</span>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="check-btn" onclick="toggleTask(this)">✓</button>
+                        </div>
+                    </div>
+                    
+                    <div class="task-item" data-category="school">
+                        <div class="task-icon school">🔬</div>
+                        <div class="task-content">
+                            <div class="task-name">复习物理知识点</div>
+                            <div class="task-meta">
+                                <span>每周任务</span>
+                                <span class="task-points">+25积分</span>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="check-btn" onclick="toggleTask(this)">✓</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 家庭任务 -->
+                    <div class="task-item" data-category="home">
+                        <div class="task-icon home">🧹</div>
+                        <div class="task-content">
+                            <div class="task-name">整理房间</div>
+                            <div class="task-meta">
+                                <span>每日任务</span>
+                                <span class="task-points">+10积分</span>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="check-btn" onclick="toggleTask(this)">✓</button>
+                        </div>
+                    </div>
+                    
+                    <div class="task-item" data-category="home">
+                        <div class="task-icon home">🍽️</div>
+                        <div class="task-content">
+                            <div class="task-name">帮忙洗碗</div>
+                            <div class="task-meta">
+                                <span>每日任务</span>
+                                <span class="task-points">+8积分</span>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="check-btn" onclick="toggleTask(this)">✓</button>
+                        </div>
+                    </div>
+                    
+                    <div class="task-item" data-category="home">
+                        <div class="task-icon home">🛒</div>
+                        <div class="task-content">
+                            <div class="task-name">陪妈妈买菜</div>
+                            <div class="task-meta">
+                                <span>周末任务</span>
+                                <span class="task-points">+15积分</span>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="check-btn" onclick="toggleTask(this)">✓</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 临时任务 -->
+                    <div class="task-item" data-category="temp">
+                        <div class="task-icon temp">🏃</div>
+                        <div class="task-content">
+                            <div class="task-name">晨跑30分钟</div>
+                            <div class="task-meta">
+                                <span>本周任务</span>
+                                <span class="task-points">+30积分</span>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="check-btn" onclick="toggleTask(this)">✓</button>
+                        </div>
+                    </div>
+                    
+                    <div class="task-item" data-category="temp">
+                        <div class="task-icon temp">📖</div>
+                        <div class="task-content">
+                            <div class="task-name">阅读课外书</div>
+                            <div class="task-meta">
+                                <span>本周任务</span>
+                                <span class="task-points">+20积分</span>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="check-btn" onclick="toggleTask(this)">✓</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2421,11 +2829,11 @@
             </div>
             
             <div class="task-categories">
-                <button class="category-btn active" onclick="filterTasks('all')">全部</button>
-                <button class="category-btn" onclick="filterTasks('school')">📚 学校</button>
-                <button class="category-btn" onclick="filterTasks('home')">🏠 家庭</button>
-                <button class="category-btn" onclick="filterTasks('temp')">⚡ 临时</button>
-            </div>
+                    <button class="category-btn active" onclick="filterTasks('all')">全部</button>
+                    <button class="category-btn" onclick="filterTasks('school')">学校</button>
+                    <button class="category-btn" onclick="filterTasks('home')">家庭</button>
+                    <button class="category-btn" onclick="filterTasks('temp')">临时</button>
+                </div>
             
             <div class="task-list" id="taskList">
                 <!-- 学校任务 -->
@@ -2593,8 +3001,8 @@
                 
                 <div class="shop-categories">
                     <button class="category-btn active" onclick="filterShop('all')">全部</button>
-                    <button class="category-btn" onclick="filterShop('digital')">数字商品</button>
-                    <button class="category-btn" onclick="filterShop('physical')">实物商品</button>
+                    <button class="category-btn" onclick="filterShop('digital')">娱乐类</button>
+                <button class="category-btn" onclick="filterShop('physical')">实物类</button>
                     <button class="category-btn" onclick="filterShop('experience')">体验类</button>
                 </div>
                 
@@ -2651,7 +3059,7 @@
                     </div>
                 </div>
                 
-                <div class="profile-actions">
+                <div class="profile-actions" id="parentOnlyActions" style="display: none;">
                     <button class="action-btn" onclick="exportData()">📤 导出数据</button>
                     <button class="action-btn" onclick="clearData()">🗑️ 清空数据</button>
                 </div>
@@ -2677,7 +3085,7 @@
                 <div class="parent-section">
                     <div class="parent-section-title">📋 任务管理</div>
                     <div class="task-management-summary">
-                        <div class="summary-stats-row">
+                        <div class="summary-stats-grid">
                             <div class="summary-item">
                                 <span class="summary-label">总任务数</span>
                                 <span class="summary-value" id="totalTasksCount">0</span>
@@ -2704,7 +3112,7 @@
                 
                 <!-- 孩子数据分析 -->
                 <div class="parent-section">
-                    <div class="parent-section-title">📈 学习数据分析</div>
+                    <div class="parent-section-title">📊 数据概览</div>
                     <div class="data-analysis">
                         <div class="analysis-item">
                             <div class="analysis-label">本周完成率</div>
@@ -2725,7 +3133,7 @@
                 <div class="parent-section">
                     <div class="parent-section-title">🎁 积分商品管理</div>
                     <div class="product-summary">
-                        <div class="summary-stats">
+                        <div class="summary-stats-three">
                             <div class="summary-item">
                                 <span class="summary-label">商品总数</span>
                                 <span class="summary-value" id="totalProductsCount">0</span>
@@ -2785,10 +3193,6 @@
                 <div class="nav-icon">🏠</div>
                 <div>首页</div>
             </button>
-            <button class="nav-item" onclick="switchTab('tasks')">
-                <div class="nav-icon">📋</div>
-                <div>任务</div>
-            </button>
             <button class="nav-item" onclick="switchTab('stats')">
                 <div class="nav-icon">📊</div>
                 <div>统计</div>
@@ -2799,7 +3203,7 @@
             </button>
             <button class="nav-item" onclick="switchTab('shop')">
                 <div class="nav-icon">🛒</div>
-                <div>商城</div>
+                <div>兑换</div>
             </button>
         </div>
     </div>
@@ -2859,8 +3263,12 @@
             </div>
             
             <div class="form-group" id="temporaryTaskGroup" style="display: none;">
-                <label class="form-label">截止日期</label>
-                <input type="date" class="form-input" id="taskDeadline">
+                <label class="form-label">截止时间</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="date" class="form-input" id="taskDeadlineDate" style="flex: 1;">
+                    <input type="time" class="form-input" id="taskDeadlineTime" style="flex: 1;" value="23:59">
+                </div>
+                <small style="color: #666; font-size: 12px; margin-top: 4px; display: block;">请选择任务的截止日期和时间</small>
             </div>
             
             <div class="modal-actions">
@@ -3189,10 +3597,9 @@
             <div class="product-filter">
                 <select class="form-select" id="productCategoryFilter" onchange="filterProducts()">
                     <option value="all">全部分类</option>
-                    <option value="study">学习用品</option>
-                    <option value="entertainment">娱乐时间</option>
-                    <option value="special">特殊奖励</option>
-                    <option value="physical">实物奖励</option>
+                    <option value="entertainment">娱乐类</option>
+                    <option value="physical">实物类</option>
+                    <option value="experience">体验类</option>
                 </select>
                 <button class="btn btn-primary" onclick="showAddProductModal()">➕ 添加商品</button>
             </div>
@@ -3231,10 +3638,9 @@
             <div class="form-group">
                 <label class="form-label">商品分类</label>
                 <select class="form-select" id="productCategory">
-                    <option value="study">📚 学习用品</option>
-                    <option value="entertainment">🎮 娱乐时间</option>
-                    <option value="special">🌟 特殊奖励</option>
-                    <option value="physical">🎁 实物奖励</option>
+                    <option value="entertainment">🎮 娱乐类</option>
+                    <option value="physical">🎁 实物类</option>
+                    <option value="experience">🌟 体验类</option>
                 </select>
             </div>
             
@@ -3308,76 +3714,14 @@
         };
         
         // 任务数据
-        let tasks = JSON.parse(localStorage.getItem('tasks')) || [
-            {
-                id: 'task_1',
-                title: '完成数学作业',
-                category: 'school',
-                frequency: 'daily',
-                points: 20,
-                completed: false,
-                createdAt: new Date().toISOString(),
-                createdBy: 'student'
-            },
-            {
-                id: 'task_2',
-                title: '背诵英语单词',
-                category: 'school',
-                frequency: 'daily',
-                points: 15,
-                completed: false,
-                createdAt: new Date().toISOString(),
-                createdBy: 'student'
-            },
-            {
-                id: 'task_3',
-                title: '整理房间',
-                category: 'home',
-                frequency: 'daily',
-                points: 10,
-                completed: false,
-                createdAt: new Date().toISOString(),
-                createdBy: 'student'
-            }
-        ];
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         
         // 当前模式
         let currentMode = localStorage.getItem('currentMode') || 'student';
         let parentPassword = localStorage.getItem('parentPassword') || '123456';
         
         // 积分商品数据
-        let products = JSON.parse(localStorage.getItem('products')) || [
-            {
-                id: 'product_1',
-                name: '额外游戏时间',
-                description: '获得30分钟额外游戏时间',
-                points: 50,
-                category: 'entertainment',
-                icon: '🎮',
-                enabled: true,
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: 'product_2',
-                name: '选择晚餐菜单',
-                description: '可以选择今晚的晚餐菜单',
-                points: 30,
-                category: 'special',
-                icon: '🍽️',
-                enabled: true,
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: 'product_3',
-                name: '新文具套装',
-                description: '精美的文具套装奖励',
-                points: 100,
-                category: 'study',
-                icon: '📚',
-                enabled: true,
-                createdAt: new Date().toISOString()
-            }
-        ];
+        let products = JSON.parse(localStorage.getItem('products')) || [];
         
         // 兑换历史数据
         let exchangeHistory = JSON.parse(localStorage.getItem('exchangeHistory')) || [];
@@ -3696,10 +4040,13 @@
         
         // 初始化应用
         function init() {
+            // 首先检查并重置周期性任务
+            resetPeriodicTasks();
+            
             loadHomePage();
             addPointsAnimationCSS();
             addAchievementAnimationCSS();
-            checkAchievements(); // 检查成就解锁
+            // 移除初始化时的成就检查，避免重复显示解锁提示
             initPermissionSystem(); // 初始化权限系统
             
             // 初始化任务管理功能
@@ -3802,22 +4149,48 @@
             document.getElementById('userAvatar').textContent = userProfile.avatar;
             document.getElementById('homePoints').textContent = totalPoints;
             
-            // 计算今日进度
-            const todayTasks = getTodayTasks();
-            const completedToday = getCompletedTodayTasks();
-            const progressPercent = todayTasks.length > 0 ? (completedToday.length / todayTasks.length) * 100 : 0;
+            // 更新月度统计
+            const monthlyStats = getMonthlyStats();
+            document.getElementById('monthlyTotalTasks').textContent = monthlyStats.totalTasks;
+            document.getElementById('monthlyCompletedTasks').textContent = monthlyStats.completedTasks;
+            document.getElementById('monthlyPendingTasks').textContent = monthlyStats.pendingTasks;
+            document.getElementById('monthlyTotalPoints').textContent = monthlyStats.totalPoints;
             
-            document.getElementById('dailyProgress').style.width = progressPercent + '%';
-            document.getElementById('progressText').textContent = `${completedToday.length}/${todayTasks.length} 任务完成`;
-            
-            // 更新快速统计
-            document.getElementById('quickTotalTasks').textContent = getAllTasks().length;
-            document.getElementById('quickCompletedTasks').textContent = completedTasks.length;
-            document.getElementById('quickStreakDays').textContent = userProfile.streakDays;
-            
-            // 加载最新成就
-            loadRecentAchievements();
+            // 渲染首页任务列表
+            renderHomeTaskList();
         }
+        
+        // 获取月度统计数据
+        function getMonthlyStats() {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            
+            let totalTasks = 0;
+            let completedTasks = 0;
+            let totalPoints = 0;
+            
+            // 计算本月任务统计
+            tasks.forEach(task => {
+                const taskDate = new Date(task.createdAt || now);
+                if (taskDate.getMonth() === currentMonth && taskDate.getFullYear() === currentYear) {
+                    totalTasks++;
+                    if (task.completed) {
+                        completedTasks++;
+                        totalPoints += task.points || 10;
+                    }
+                }
+            });
+            
+            return {
+                totalTasks,
+                completedTasks,
+                pendingTasks: totalTasks - completedTasks,
+                totalPoints
+            };
+        }
+        
+
         
         // 获取等级称号
         function getLevelTitle(level) {
@@ -3828,6 +4201,89 @@
         }
         
         // ========== 智能任务过滤系统 ==========
+        
+        // 重置周期性任务
+        function resetPeriodicTasks() {
+            const now = new Date();
+            const today = now.toDateString();
+            
+            // 获取上次重置检查的日期
+            const lastResetCheck = localStorage.getItem('lastResetCheck');
+            
+            // 如果今天已经检查过，则跳过
+            if (lastResetCheck === today) {
+                return;
+            }
+            
+            let hasReset = false;
+            
+            // 遍历所有任务，重置周期性任务
+            tasks.forEach(task => {
+                if (!task.completed) return; // 未完成的任务不需要重置
+                
+                const completedDate = new Date(task.completedAt || task.createdAt);
+                let shouldReset = false;
+                
+                // 检查是否需要重置
+                switch (task.frequency) {
+                    case 'daily':
+                        // 每日任务：如果完成日期不是今天，则重置
+                        shouldReset = completedDate.toDateString() !== today;
+                        break;
+                        
+                    case 'weekly':
+                        // 每周任务：如果已过了一周，则重置
+                        const weekStart = new Date(now);
+                        weekStart.setDate(now.getDate() - now.getDay()); // 本周开始（周日）
+                        weekStart.setHours(0, 0, 0, 0);
+                        shouldReset = completedDate < weekStart;
+                        break;
+                        
+                    case 'weekdays':
+                        // 工作日任务：如果完成日期不是今天且今天是工作日，则重置
+                        const dayOfWeek = now.getDay();
+                        shouldReset = completedDate.toDateString() !== today && dayOfWeek >= 1 && dayOfWeek <= 5;
+                        break;
+                        
+                    case 'weekends':
+                        // 周末任务：如果完成日期不是今天且今天是周末，则重置
+                        const isWeekend = now.getDay() === 0 || now.getDay() === 6;
+                        shouldReset = completedDate.toDateString() !== today && isWeekend;
+                        break;
+                        
+                    case 'monthly':
+                        // 每月任务：如果已过了一个月，则重置
+                        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                        shouldReset = completedDate < monthStart;
+                        break;
+                }
+                
+                // 执行重置
+                if (shouldReset) {
+                    task.completed = false;
+                    task.completedAt = null;
+                    hasReset = true;
+                    
+                    // 从已完成任务列表中移除相关记录
+                    completedTasks = completedTasks.filter(ct => ct.id !== task.id || 
+                        new Date(ct.completedAt || ct.date).toDateString() === today);
+                }
+            });
+            
+            // 如果有任务被重置，保存数据并显示提示
+            if (hasReset) {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+                
+                // 显示友好的重置提示
+                setTimeout(() => {
+                    showEnhancedToast('🔄 周期性任务已自动重置，新的挑战开始了！', 'info');
+                }, 1000);
+            }
+            
+            // 记录今天已经检查过
+            localStorage.setItem('lastResetCheck', today);
+        }
         
         // 获取今日任务（智能过滤）
         function getTodayTasks() {
@@ -3867,17 +4323,18 @@
         
         // 任务过滤功能
         function filterTasks(category = 'all') {
-            const taskList = document.getElementById('taskList');
-            if (!taskList) return;
-            
             let filteredTasks = tasks;
             
             if (category !== 'all') {
                 filteredTasks = tasks.filter(task => task.category === category);
             }
             
-            // 重新渲染任务列表
+            // 重新渲染任务列表 - 同时更新首页和任务页
             renderTaskList(filteredTasks);
+            renderHomeTaskList(filteredTasks);
+            
+            // 更新分类按钮状态
+            updateCategoryButtons(category);
         }
         
         // 渲染任务列表
@@ -3902,7 +4359,7 @@
                 let actionButtons = `
                     <button class="btn-complete" onclick="toggleTask('${task.id}')" 
                             ${task.completed ? 'disabled' : ''}>
-                        ${task.completed ? '✅' : '⭕'}
+                        ${task.completed ? '🎉' : '💪'}
                     </button>
                 `;
                 
@@ -3918,6 +4375,27 @@
                     `;
                 }
                 
+                // 格式化截止时间显示
+                let deadlineText = '';
+                if (task.deadline) {
+                    const deadline = new Date(task.deadline);
+                    const now = new Date();
+                    const isOverdue = deadline < now && !task.completed;
+                    
+                    const dateStr = deadline.toLocaleDateString('zh-CN', {
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    const timeStr = deadline.toLocaleTimeString('zh-CN', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    deadlineText = `<span class="deadline ${isOverdue ? 'overdue' : ''}" title="截止时间">
+                        ⏰ ${dateStr} ${timeStr}
+                    </span>`;
+                }
+                
                 taskItem.innerHTML = `
                     <div class="task-content">
                         <div class="task-icon">${getTaskTypeIcon(task.category)}</div>
@@ -3925,6 +4403,7 @@
                             <div class="task-title">${task.title}</div>
                             <div class="task-meta">
                                 ${getTaskTypeName(task.category)} • ${task.points} 积分
+                                ${deadlineText}
                             </div>
                         </div>
                     </div>
@@ -3936,6 +4415,107 @@
             });
         }
         
+        // 渲染首页任务列表
+        function renderHomeTaskList(taskList = tasks) {
+            const container = document.getElementById('homeTaskList');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            if (taskList.length === 0) {
+                container.innerHTML = '<div class="empty-state">暂无任务</div>';
+                return;
+            }
+            
+            const currentMode = localStorage.getItem('currentUserMode') || 'student';
+            
+            taskList.forEach(task => {
+                const taskItem = document.createElement('div');
+                taskItem.className = `task-item ${task.completed ? 'completed' : ''}`;
+                
+                // 构建任务操作按钮
+                let actionButtons = `
+                    <button class="btn-complete" onclick="toggleTask('${task.id}')" 
+                            ${task.completed ? 'disabled' : ''}>
+                        ${task.completed ? '🎉' : '💪'}
+                    </button>
+                `;
+                
+                // 家长模式下添加编辑和删除按钮
+                if (currentMode === 'parent') {
+                    actionButtons += `
+                        <button class="btn-edit" onclick="editTask('${task.id}')" title="编辑任务">
+                            ✏️
+                        </button>
+                        <button class="btn-delete" onclick="deleteTask('${task.id}')" title="删除任务">
+                            🗑️
+                        </button>
+                    `;
+                }
+                
+                // 格式化截止时间显示
+                let deadlineText = '';
+                if (task.deadline) {
+                    const deadline = new Date(task.deadline);
+                    const now = new Date();
+                    const isOverdue = deadline < now && !task.completed;
+                    
+                    const dateStr = deadline.toLocaleDateString('zh-CN', {
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    const timeStr = deadline.toLocaleTimeString('zh-CN', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    deadlineText = `<span class="deadline ${isOverdue ? 'overdue' : ''}" title="截止时间">
+                        ⏰ ${dateStr} ${timeStr}
+                    </span>`;
+                }
+                
+                taskItem.innerHTML = `
+                    <div class="task-content">
+                        <div class="task-icon">${getTaskTypeIcon(task.category)}</div>
+                        <div class="task-info">
+                            <div class="task-title">${task.title}</div>
+                            <div class="task-meta">
+                                ${getTaskTypeName(task.category)} • ${task.points} 积分
+                                ${deadlineText}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        ${actionButtons}
+                    </div>
+                `;
+                container.appendChild(taskItem);
+            });
+        }
+        
+        // 更新分类按钮状态
+        function updateCategoryButtons(activeCategory) {
+            // 更新首页分类按钮
+            const homeButtons = document.querySelectorAll('#homePage .category-btn');
+            homeButtons.forEach(btn => {
+                btn.classList.remove('active');
+                const btnCategory = btn.onclick.toString().match(/filterTasks\('(.+?)'\)/);
+                if (btnCategory && btnCategory[1] === activeCategory) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // 更新任务页分类按钮
+            const taskButtons = document.querySelectorAll('#tasksPage .category-btn');
+            taskButtons.forEach(btn => {
+                btn.classList.remove('active');
+                const btnCategory = btn.onclick.toString().match(/filterTasks\('(.+?)'\)/);
+                if (btnCategory && btnCategory[1] === activeCategory) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
         // 切换任务完成状态
         function toggleTask(taskId) {
             const task = tasks.find(t => t.id == taskId);
@@ -3943,50 +4523,101 @@
             
             // 如果任务已完成，不允许重复完成
             if (task.completed) {
-                showToast('该任务已经完成了！');
+                showEnhancedToast('该任务已经完成了！', 'warning');
                 return;
             }
             
-            // 标记任务为完成
-            task.completed = true;
-            task.completedAt = new Date().toISOString();
-            
-            // 添加到已完成任务列表
-            const completedTask = {
-                id: taskId,
-                title: task.title,
-                category: task.category || task.type,
-                points: task.points,
-                completedAt: task.completedAt,
-                date: new Date().toISOString(),
-                priority: task.priority || 'medium'
-            };
-            completedTasks.push(completedTask);
-            
-            // 增加积分
-            totalPoints += task.points;
-            
-            // 显示完成动画
-            showTaskCompleteAnimation(task);
-            
-            // 保存数据
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-            localStorage.setItem('totalPoints', totalPoints.toString());
-            
-            // 检查成就
-            checkAchievements();
-            
-            // 更新显示
-            const currentPage = document.querySelector('.page[style*="block"]');
-            if (currentPage && currentPage.id === 'homePage') {
-                loadHomePage();
-            } else if (currentPage && currentPage.id === 'tasksPage') {
-                renderTaskList();
+            // 立即更新按钮状态，提供即时反馈
+            const button = document.querySelector(`button[onclick="toggleTask('${taskId}')"]`);
+            if (button) {
+                button.disabled = true;
+                button.classList.add('checking-in');
+                button.innerHTML = '⏳';
+                
+                // 添加按钮点击动画
+                button.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    button.style.transform = 'scale(1)';
+                }, 150);
             }
             
-            // 显示成功提示
-            showToast(`🎉 完成任务"${task.title}"，获得${task.points}积分！`);
+            // 播放打卡音效（如果支持）
+            playCheckInSound();
+            
+            // 延迟一点时间让用户看到反馈，然后处理逻辑
+            setTimeout(() => {
+                // 标记任务为完成
+                task.completed = true;
+                task.completedAt = new Date().toISOString();
+                
+                // 添加到已完成任务列表
+                const completedTask = {
+                    id: taskId,
+                    title: task.title,
+                    category: task.category || task.type,
+                    points: task.points,
+                    completedAt: task.completedAt,
+                    date: new Date().toISOString(),
+                    priority: task.priority || 'medium'
+                };
+                completedTasks.push(completedTask);
+                
+                // 增加积分
+                totalPoints += task.points;
+                
+                // 立即更新按钮为完成状态
+                if (button) {
+                    button.classList.remove('checking-in');
+                    button.classList.add('completed');
+                    button.innerHTML = '✓';
+                    button.disabled = false;
+                    
+                    // 添加成功动画效果
+                    button.style.background = '#28a745';
+                    button.style.color = 'white';
+                    button.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        button.style.transform = 'scale(1)';
+                    }, 200);
+                }
+                
+                // 立即更新任务项的视觉状态
+                const taskElement = button.closest('.task-item');
+                if (taskElement) {
+                    taskElement.classList.add('completed');
+                    taskElement.style.opacity = '0.7';
+                    
+                    // 添加完成动画
+                    taskElement.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        taskElement.style.transform = 'scale(1)';
+                    }, 300);
+                }
+                
+                // 显示增强的完成动画（包含所有信息，不需要额外的toast）
+                showEnhancedTaskCompleteAnimation(task);
+                
+                // 保存数据
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+                localStorage.setItem('totalPoints', totalPoints.toString());
+                
+                // 检查成就
+                checkAchievements();
+                
+                // 延迟更新显示，让用户先看到即时反馈
+                setTimeout(() => {
+                    const currentPage = document.querySelector('.page[style*="block"]');
+                    if (currentPage && currentPage.id === 'homePage') {
+                        loadHomePage();
+                    } else if (currentPage && currentPage.id === 'tasksPage') {
+                        renderTaskList();
+                    }
+                    // 无论在哪个页面，都更新首页任务列表
+                    renderHomeTaskList();
+                }, 500);
+                
+            }, 300); // 300ms延迟让用户看到即时反馈
         }
         
         // 显示任务完成动画
@@ -4142,26 +4773,10 @@
             updateShopPoints();
         }
         
-        // 商城物品数据
-        const shopItems = [
-            // 数字商品
-            { id: 'digital_1', name: '游戏时间30分钟', price: 30, category: 'digital', icon: '🎮', description: '额外获得30分钟游戏时间' },
-            { id: 'digital_2', name: '看动画片1小时', price: 50, category: 'digital', icon: '📺', description: '可以看1小时喜欢的动画片' },
-            { id: 'digital_3', name: '手机使用时间', price: 40, category: 'digital', icon: '📱', description: '额外获得30分钟手机使用时间' },
-            
-            // 实物商品
-            { id: 'physical_1', name: '小零食', price: 20, category: 'physical', icon: '🍪', description: '选择一样喜欢的小零食' },
-            { id: 'physical_2', name: '文具用品', price: 60, category: 'physical', icon: '✏️', description: '购买一件学习文具' },
-            { id: 'physical_3', name: '小玩具', price: 80, category: 'physical', icon: '🧸', description: '选择一个心仪的小玩具' },
-            { id: 'physical_4', name: '新书籍', price: 100, category: 'physical', icon: '📚', description: '购买一本喜欢的课外书' },
-            
-            // 体验类
-            { id: 'experience_1', name: '周末电影院', price: 150, category: 'experience', icon: '🎬', description: '和家人一起去电影院看电影' },
-            { id: 'experience_2', name: '游乐园门票', price: 200, category: 'experience', icon: '🎡', description: '获得游乐园门票一张' },
-            { id: 'experience_3', name: '外出就餐', price: 120, category: 'experience', icon: '🍽️', description: '选择喜欢的餐厅外出就餐' },
-            { id: 'experience_4', name: '周末郊游', price: 180, category: 'experience', icon: '🏞️', description: '和家人一起周末郊游' },
-            { id: 'experience_5', name: '免做家务一天', price: 90, category: 'experience', icon: '🏠', description: '免除一天的家务任务' }
-        ];
+        // 商城物品数据 - 从localStorage读取products数据
+        function getShopItems() {
+            return products || [];
+        }
         
         // 当前选中的商城分类
         let currentShopCategory = 'all';
@@ -4172,6 +4787,7 @@
             if (!container) return;
             
             // 根据分类筛选商品
+            const shopItems = getShopItems();
             let filteredItems = shopItems;
             if (category !== 'all') {
                 filteredItems = shopItems.filter(item => item.category === category);
@@ -4476,6 +5092,174 @@
                 }
             }, 3000);
         }
+
+        // 增强的Toast提示函数
+        function showEnhancedToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `enhanced-toast ${type}`;
+            
+            // 根据类型设置图标和颜色
+            let icon = '';
+            let bgColor = '';
+            switch(type) {
+                case 'success':
+                    icon = '🎉';
+                    bgColor = 'linear-gradient(135deg, #28a745, #20c997)';
+                    break;
+                case 'warning':
+                    icon = '⚠️';
+                    bgColor = 'linear-gradient(135deg, #ffc107, #fd7e14)';
+                    break;
+                case 'error':
+                    icon = '❌';
+                    bgColor = 'linear-gradient(135deg, #dc3545, #e83e8c)';
+                    break;
+                default:
+                    icon = 'ℹ️';
+                    bgColor = 'linear-gradient(135deg, #17a2b8, #6f42c1)';
+            }
+            
+            toast.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) scale(0);
+                background: ${bgColor};
+                color: white;
+                padding: 20px 30px;
+                border-radius: 15px;
+                z-index: 10001;
+                font-size: 16px;
+                font-weight: 600;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                text-align: center;
+                min-width: 280px;
+                transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            `;
+            
+            toast.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <span style="font-size: 24px;">${icon}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // 添加进入动画
+            setTimeout(() => {
+                toast.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 50);
+            
+            // 自动消失
+            setTimeout(() => {
+                toast.style.transform = 'translate(-50%, -50%) scale(0)';
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
+                    }
+                }, 300);
+            }, type === 'success' ? 2500 : 2000);
+        }
+
+        // 播放打卡音效函数
+        function playCheckInSound() {
+            try {
+                // 创建音频上下文（如果支持）
+                if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+                    const audioContext = new (AudioContext || webkitAudioContext)();
+                    
+                    // 创建简单的成功音效
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
+                    
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                }
+            } catch (error) {
+                // 如果音频不支持，静默失败
+                console.log('Audio not supported');
+            }
+        }
+
+        // 增强的任务完成动画
+        function showEnhancedTaskCompleteAnimation(task) {
+            // 创建更显眼的完成动画
+            const animation = document.createElement('div');
+            animation.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) scale(0);
+                background: linear-gradient(135deg, #28a745, #20c997);
+                color: white;
+                padding: 30px;
+                border-radius: 20px;
+                z-index: 10002;
+                text-align: center;
+                box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+                transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            `;
+            
+            animation.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                    <div style="
+                        width: 60px; 
+                        height: 60px; 
+                        border-radius: 50%; 
+                        background: rgba(255,255,255,0.2); 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center;
+                        font-size: 30px;
+                        animation: checkmarkBounce 0.6s ease-out;
+                    ">🎉</div>
+                    <div style="font-size: 18px; font-weight: 600;">打卡成功！</div>
+                    <div style="font-size: 16px; margin: 5px 0; max-width: 250px; word-wrap: break-word;">"${task.title}"</div>
+                    <div style="font-size: 14px; opacity: 0.9;">获得 ${task.points} 积分</div>
+                </div>
+            `;
+            
+            // 添加动画样式
+            if (!document.getElementById('checkmarkAnimation')) {
+                const style = document.createElement('style');
+                style.id = 'checkmarkAnimation';
+                style.textContent = `
+                    @keyframes checkmarkBounce {
+                        0% { transform: scale(0); }
+                        50% { transform: scale(1.2); }
+                        100% { transform: scale(1); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(animation);
+            
+            // 触发动画
+            setTimeout(() => {
+                animation.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 100);
+            
+            // 移除动画
+            setTimeout(() => {
+                animation.style.transform = 'translate(-50%, -50%) scale(0)';
+                setTimeout(() => {
+                    if (document.body.contains(animation)) {
+                        document.body.removeChild(animation);
+                    }
+                }, 400);
+            }, 1800);
+        }
         
         // 获取任务类型图标
         function getTaskTypeIcon(category) {
@@ -4591,36 +5375,7 @@
             }
         }
         
-        // 获取已解锁成就
-        function getUnlockedAchievements() {
-            const achievements = [];
-            
-            if (completedTasks.length >= 1) {
-                achievements.push({
-                    icon: '🎯',
-                    name: '初次尝试',
-                    desc: '完成第一个任务'
-                });
-            }
-            
-            if (completedTasks.length >= 10) {
-                achievements.push({
-                    icon: '🔥',
-                    name: '勤奋学习',
-                    desc: '完成10个任务'
-                });
-            }
-            
-            if (totalPoints >= 100) {
-                achievements.push({
-                    icon: '💎',
-                    name: '积分达人',
-                    desc: '累计获得100积分'
-                });
-            }
-            
-            return achievements;
-        }
+
         
         // 获取任务类型图标
         function getTaskTypeIcon(type) {
@@ -4650,7 +5405,7 @@
         
         // 显示添加任务模态框
         function showAddTaskModal() {
-            const currentMode = localStorage.getItem('userMode') || 'student';
+            const currentMode = localStorage.getItem('currentUserMode') || 'student';
             const pointsInput = document.getElementById('taskPoints');
             const hint = document.querySelector('.points-hint');
             
@@ -4940,8 +5695,15 @@
             const category = document.getElementById('taskCategory').value;
             const frequency = document.getElementById('taskFrequency').value;
             const points = parseInt(document.getElementById('taskPoints').value);
-            const deadline = document.getElementById('taskDeadline').value;
-            const currentMode = localStorage.getItem('userMode') || 'student';
+            const deadlineDate = document.getElementById('taskDeadlineDate').value;
+            const deadlineTime = document.getElementById('taskDeadlineTime').value;
+            const currentMode = localStorage.getItem('currentUserMode') || 'student';
+            
+            // 组合日期和时间
+            let deadline = null;
+            if (deadlineDate) {
+                deadline = deadlineDate + (deadlineTime ? 'T' + deadlineTime : 'T23:59');
+            }
             
             if (!title) {
                 showToast('❌ 请输入任务名称');
@@ -4964,7 +5726,7 @@
             }
             
             // 检查临时任务是否设置了截止日期
-            if (frequency === 'temporary' && !deadline) {
+            if (frequency === 'temporary' && !deadlineDate) {
                 showToast('❌ 临时任务需要设置截止日期');
                 return;
             }
@@ -4987,18 +5749,20 @@
             
             hideAddTaskModal();
             loadTasks();
+            renderHomeTaskList(); // 更新首页任务列表
             showToast('✅ 任务添加成功！');
         }
         
         // 显示添加任务模态框
         function showAddTaskModal() {
-            const currentMode = localStorage.getItem('userMode') || 'student';
+            const currentMode = localStorage.getItem('currentUserMode') || 'student';
             
             // 重置表单
             document.getElementById('taskTitle').value = '';
             document.getElementById('taskCategory').value = 'school';
             document.getElementById('taskFrequency').value = 'daily';
-            document.getElementById('taskDeadline').value = '';
+            document.getElementById('taskDeadlineDate').value = '';
+            document.getElementById('taskDeadlineTime').value = '23:59';
             
             // 根据用户模式设置积分字段
             const pointsInput = document.getElementById('taskPoints');
@@ -5149,7 +5913,7 @@
             achievementHtml += '<div style="max-height: 300px; overflow-y: auto;">';
             
             allAchievements.forEach(achievement => {
-                const isUnlocked = unlockedAchievements.some(unlocked => unlocked.id === achievement.id);
+                const isUnlocked = unlockedAchievements.includes(achievement.id);
                 const opacity = isUnlocked ? '1' : '0.5';
                 const bgColor = isUnlocked ? '#f8f9fa' : '#f5f5f5';
                 const iconFilter = isUnlocked ? '' : 'grayscale(1)';
@@ -5477,46 +6241,60 @@
             const bottomNav = document.querySelector('.bottom-nav');
             console.log('底部导航元素:', bottomNav ? '找到' : '未找到');
             
-            if (currentUserMode === 'parent') {
-                console.log('执行家长模式UI更新');
-                // 家长模式：保持底部导航显示，允许在所有页面间切换
-                if (bottomNav) {
-                    bottomNav.style.display = 'flex';
-                    console.log('家长模式下保持底部导航显示');
-                }
-                
-                // 隐藏家长管理页面，显示正常页面导航
-                const parentPage = document.getElementById('parentPage');
-                if (parentPage) {
-                    parentPage.style.display = 'none';
-                    console.log('已隐藏家长专用页面');
-                }
-                
-                // 切换到首页，让家长可以正常浏览所有页面
-                console.log('调用switchTab(home)');
-                switchTab('home');
+            // 确保底部导航始终显示
+            if (bottomNav) {
+                bottomNav.style.display = 'flex';
+                console.log('已显示底部导航');
             } else {
-                console.log('执行学生模式UI更新');
-                // 学生模式：显示底部导航，隐藏家长管理页面
-                if (bottomNav) {
-                    bottomNav.style.display = 'flex';
-                    console.log('已显示底部导航');
-                } else {
-                    console.log('警告：找不到底部导航元素');
-                }
-                
-                const parentPage = document.getElementById('parentPage');
-                if (parentPage) {
-                    parentPage.style.display = 'none';
-                    console.log('已隐藏家长页面');
-                } else {
-                    console.log('警告：找不到parentPage元素');
-                }
-                
-                // 切换到首页
-                console.log('调用switchTab(home)');
-                switchTab('home');
+                console.log('警告：找不到底部导航元素');
             }
+            
+            // 控制家长专用功能按钮的显示
+            const parentOnlyActions = document.getElementById('parentOnlyActions');
+            if (parentOnlyActions) {
+                if (currentUserMode === 'parent') {
+                    parentOnlyActions.style.display = 'block';
+                    console.log('已显示家长专用功能按钮');
+                } else {
+                    parentOnlyActions.style.display = 'none';
+                    console.log('已隐藏家长专用功能按钮');
+                }
+            } else {
+                console.log('警告：找不到parentOnlyActions元素');
+            }
+            
+            // 确保家长页面被隐藏
+            const parentPage = document.getElementById('parentPage');
+            if (parentPage) {
+                parentPage.style.display = 'none';
+                parentPage.classList.remove('active');
+                console.log('已隐藏家长页面');
+            } else {
+                console.log('警告：找不到parentPage元素');
+            }
+            
+            // 确保首页正确显示
+            const homePage = document.getElementById('homePage');
+            if (homePage) {
+                // 先隐藏所有页面
+                const allPages = document.querySelectorAll('.page');
+                allPages.forEach(page => {
+                    page.style.display = 'none';
+                    page.classList.remove('active');
+                });
+                
+                // 显示首页
+                homePage.style.display = 'block';
+                homePage.classList.add('active');
+                console.log('已显示首页');
+                
+                // 加载首页数据
+                loadHomePage();
+                console.log('已加载首页数据');
+            } else {
+                console.log('警告：找不到homePage元素');
+            }
+            
             console.log('updateUIForUserMode() 执行完成');
         }
         
@@ -6025,6 +6803,7 @@
                 updateTaskPreview();
                 updateStats();
                 loadTasks();
+                renderHomeTaskList(); // 更新首页任务列表
                 
                 showToast(`✅ 任务"${taskTitle}"删除成功`);
             }
@@ -6492,7 +7271,7 @@
             
             // 调用原始的switchTab函数
             if (originalSwitchTab && typeof originalSwitchTab === 'function') {
-                originalSwitchTab.call(this, tabName);
+                originalSwitchTab(tabName);
             } else {
                 console.error('originalSwitchTab is not a function:', originalSwitchTab);
                 // 如果原始函数不可用，直接执行基本的页面切换逻辑
@@ -6547,7 +7326,7 @@
         
         // 编辑任务函数
         function editTask(taskId) {
-            const currentMode = localStorage.getItem('userMode') || 'student';
+            const currentMode = localStorage.getItem('currentUserMode') || 'student';
             if (currentMode !== 'parent') {
                 showToast('❌ 只有家长可以编辑任务');
                 return;
@@ -6663,15 +7442,18 @@
             // 隐藏模态框
             hideEditTaskModal();
             
-            // 重新渲染任务列表
-            renderTaskList();
+            // 跳转到首页
+            switchTab('home');
+            
+            // 重置分类筛选为"全部"并重新渲染任务列表
+            filterTasks('all');
             
             showToast('✅ 任务编辑成功');
         }
         
         // 删除任务函数
         function deleteTask(taskId) {
-            const currentMode = localStorage.getItem('userMode') || 'student';
+            const currentMode = localStorage.getItem('currentUserMode') || 'student';
             if (currentMode !== 'parent') {
                 showToast('❌ 只有家长可以删除任务');
                 return;
@@ -6695,6 +7477,7 @@
                     
                     // 重新渲染任务列表
                     renderTaskList();
+                    renderHomeTaskList(); // 更新首页任务列表
                     
                     showToast('✅ 任务删除成功');
                 } else {
@@ -6707,10 +7490,8 @@
         function initPermissionSystem() {
             updateUserModeDisplay();
             
-            // 如果当前是家长模式，直接显示家长页面
-            if (currentUserMode === 'parent') {
-                updateUIForUserMode();
-            }
+            // 更新UI以应用权限控制
+            updateUIForUserMode();
         }
         
         // 初始化应用
